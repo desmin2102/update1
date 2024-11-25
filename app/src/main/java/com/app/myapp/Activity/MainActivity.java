@@ -3,22 +3,38 @@ package com.app.myapp.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
-import android.widget.Adapter;
 import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.Toast;
 
+import androidx.appcompat.widget.Toolbar;
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.viewpager2.widget.CompositePageTransformer;
+import androidx.viewpager2.widget.MarginPageTransformer;
 import androidx.viewpager2.widget.ViewPager2;
+
 
 import com.app.myapp.Adapter.AdAdapter;
 import com.app.myapp.Adapter.MovieAdapter;
 import com.app.myapp.Class.Ad;
-import com.app.myapp.Class.Cinema;
-import com.app.myapp.Class.CinemaHall;
 import com.app.myapp.Class.Movie;
 import com.app.myapp.R;
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.RequestOptions;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.android.material.navigation.NavigationView;
+import com.google.firebase.FirebaseApp;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -29,16 +45,28 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 
+import jp.wasabeef.glide.transformations.BlurTransformation;
 import me.relex.circleindicator.CircleIndicator3;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
+    public static final int MY_REQUEST_CODE = 10;
+
+    private static final int Fragment_PhimDaXem = 0;
+    private static final int Fragment_VecuaTui = 1;
+    private static final int Fragment_ThongTinThanhVien = 2;
+    private static final int Fragment_ChinhSachTichDiem = 3;
+    private static final int Fragment_ChangePassWord = 4;
+
+    private int mCurrentFragment = 0;
+
 
     private ViewPager2 viewPagerqc;
     private ViewPager2 viewPagermv;
 
     private CircleIndicator3 circleIndicator;
-    private Handler handler = new Handler();
+    private Handler handler = new Handler(Looper.getMainLooper());
     private Runnable runnable;
 
     private AdAdapter adAdapter;
@@ -47,12 +75,35 @@ public class MainActivity extends AppCompatActivity {
     private List<Ad> listAd = new ArrayList<>();
     private List<Movie> listMovie=new ArrayList<>();
 
+    private DrawerLayout drawerLayout;
+    private BottomNavigationView bottomNavigationView;
 
     private Button buttonBooking;
+    private ImageView backgroundImageView;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        drawerLayout = findViewById(R.id.main);
+        ImageView imageAccount = findViewById(R.id.imageAccount);
+        // Thiết lập biểu tượng tùy chỉnh làm biểu tượng điều hướng
+        // Xử lý sự kiện nhấp vào biểu tượng điều hướng
+        imageAccount.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // Mở ngăn kéo điều hướng
+                drawerLayout.openDrawer(GravityCompat.START);
+            }
+        });
+
+        backgroundImageView = findViewById(R.id.backgroundImageView);
+        NavigationView navigationView = findViewById(R.id.nav_view);
+        navigationView.setNavigationItemSelectedListener(this);
+
+        FirebaseApp.initializeApp(this);
+
         init();
     }
 
@@ -62,19 +113,36 @@ public class MainActivity extends AppCompatActivity {
         initializeViewsAd();
         //Khởi tạo View Movie
         initializeViewsMovie();
+        // Khởi tạo nút Booking
+        initializeBookingButton();
         // Cài đặt ảnh chạy tự động
         setupAutoSlideImages();
         // Thiết lập ViewPager
         setupViewPagerAd();
         // Lấy dữ liệu từ Firebase
+        setupViewPagerMovie();
         fetchAdsFromDatabase();
-
-        fetchMoviesFromDatabase();
-
-        setupBookingButton();
-
+                fetchMoviesFromDatabase();
         saveData();
+        // Cập nhật ảnh nền khi khởi tạo ứng dụng
+        if (!listMovie.isEmpty()) {
+            String initialImageUrl = listMovie.get(0).getImageUrl();
+            updateBackgroundImage(initialImageUrl); }
+        // Đăng ký lắng nghe sự kiện thay đổi trang trong ViewPager2
+        viewPagermv.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
+            @Override public void onPageSelected(int position) {
+                super.onPageSelected(position);
+                // Lấy URL ảnh của bộ phim hiện tại
+                String imageUrl = listMovie.get(position).getImageUrl();
+                // Cập nhật nền ứng dụng
+                updateBackgroundImage(imageUrl); } });
     }
+
+    private void updateBackgroundImage(String imageUrl) {
+        RequestOptions requestOptions = new RequestOptions()
+                .transform(new BlurTransformation(25, 3));
+        // Điều chỉnh độ mờ
+       Glide.with(this) .load(imageUrl) .apply(requestOptions) .into(backgroundImageView); }
 
     private void initializeViewsAd() {
         viewPagerqc = findViewById(R.id.viewPager_quangcao);
@@ -83,6 +151,31 @@ public class MainActivity extends AppCompatActivity {
     private void initializeViewsMovie() {
         viewPagermv = findViewById(R.id.viewPager_movie);
     }
+
+    private void initializeBookingButton() {
+        buttonBooking = findViewById(R.id.button);
+        buttonBooking.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // Kiểm tra xem danh sách phim đã được tải hay chưa
+                if (listMovie != null && !listMovie.isEmpty()) {
+                    // Lấy đối tượng Movie hiện tại từ ViewPager2
+                    Movie currentMovie = listMovie.get(viewPagermv.getCurrentItem());
+
+                    // Mở LocationActivity khi nhấn nút Booking
+                    Intent intent = new Intent(MainActivity.this, LocationActivity.class);
+                    intent.putExtra("movieId", currentMovie.getId()); // Truyền ID của bộ phim
+                    startActivity(intent);
+                } else {
+                    // Hiển thị thông báo lỗi nếu danh sách phim chưa được tải
+                    Toast.makeText(MainActivity.this, "Dữ liệu phim chưa được tải", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+    }
+
+
+
 
     private void setupAutoSlideImages() {
         runnable = new Runnable() {
@@ -109,23 +202,21 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    private void setupViewPagerMovie()
-    {
-        viewPagermv.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
-            @Override
-            public void onPageSelected(int position) {
-                super.onPageSelected(position);
-                if(position==listMovie.size()-1)
-                {
-                    viewPagermv.post(new Runnable() {
-                        @Override
-                        public void run() {
-                                viewPagermv.setCurrentItem(0,false);
-                        }
-                    });
-                }
-            }
+    private void setupViewPagerMovie() {
+        mvAdapter = new MovieAdapter(listMovie, viewPagermv);
+        viewPagermv.setAdapter(mvAdapter);
+        viewPagermv.setClipToPadding(false);
+        viewPagermv.setClipChildren(false);
+        viewPagermv.setOffscreenPageLimit(4);
+        viewPagermv.getChildAt(0).setOverScrollMode(RecyclerView.OVER_SCROLL_NEVER);
+        CompositePageTransformer compositePageTransformer = new CompositePageTransformer();
+        compositePageTransformer.addTransformer(new MarginPageTransformer(60)); // Điều chỉnh khoảng cách
+        compositePageTransformer.addTransformer((view, v) -> {
+            float r = 1 - Math.abs(v);
+            view.setScaleY(0.85f + r * 0.15f);
         });
+        viewPagermv.setPageTransformer(compositePageTransformer);
+        viewPagermv.setCurrentItem(mvAdapter.getItemCount() / 2, false);
     }
 
     private void fetchAdsFromDatabase() {
@@ -163,8 +254,7 @@ public class MainActivity extends AppCompatActivity {
                     Movie movie = snapshot.getValue(Movie.class);
                     listMovie.add(movie);
                 }
-                mvAdapter= new MovieAdapter(listMovie, MainActivity.this); // Truyền context
-                viewPagermv.setAdapter(mvAdapter);
+                mvAdapter.notifyDataSetChanged();
             }
 
             @Override
@@ -175,6 +265,10 @@ public class MainActivity extends AppCompatActivity {
 
         });
     }
+
+
+
+
     @Override
     protected void onDestroy() {
         super.onDestroy();
@@ -187,24 +281,52 @@ public class MainActivity extends AppCompatActivity {
         handler.postDelayed(runnable, 3000);
     }
 
-    //Button Boking
-    private void setupBookingButton() {
-        Button bookingButton = findViewById(R.id.button);
-        bookingButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                openSelectLocationActivity();
-            }
-        });
-    }
-
-    private void openSelectLocationActivity() {
-        Intent intent = new Intent(MainActivity.this, SelectLocationActivity.class);
-        startActivity(intent);
-    }
 
     private void saveData() {
         FirebaseDatabase database = FirebaseDatabase.getInstance();
         DatabaseReference myRef = database.getReference();
-    } }
+
+    }
+
+    @Override
+    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+        // Xử lý các mục trong NavigationView tại đây
+        int id = item.getItemId();
+        if (id == R.id.nav_change) {
+            if (mCurrentFragment != Fragment_ChangePassWord) {
+                //replaceFragment(new ChangePassword());
+                mCurrentFragment = Fragment_ChangePassWord;
+            }
+        } else if (id == R.id.nav_logout) {
+            FirebaseAuth.getInstance().signOut();
+            startActivity(new Intent(this, Login.class));
+            finish();
+        }
+        drawerLayout.closeDrawer(GravityCompat.START);
+        return true;
+    }
+
+
+//    private void addMovieToDatabase(String title, String duration, String movieDateStart, String genre, String rating, String summary, String trailerUrl, String imageUrl) {
+//        // Tạo UUID cho bộ phim mới
+//        String movieId = UUID.randomUUID().toString();
+//
+//        // Tạo đối tượng Movie mới
+//        Movie movie = new Movie(movieId, "VENOM: THE LAST DANCE", "60min", "movieDateStart", "genre", "rating", "summary", "trailerUrl", "imageUrl");
+//
+//        // Lưu Movie mới vào Firebase
+//        DatabaseReference databaseReferenceMovie = FirebaseDatabase.getInstance().getReference("Movie");
+//        databaseReferenceMovie.child(movieId).setValue(movie)
+//                .addOnSuccessListener(aVoid -> {
+//                    // Thành công
+//                    Toast.makeText(getApplicationContext(), "Movie added successfully!", Toast.LENGTH_SHORT).show();
+//                })
+//                .addOnFailureListener(e -> {
+//                    // Thất bại
+//                    Toast.makeText(getApplicationContext(), "Failed to add movie.", Toast.LENGTH_SHORT).show();
+//                });
+//    }
+
+
+}
 

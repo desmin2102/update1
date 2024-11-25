@@ -3,6 +3,7 @@ package com.app.myapp.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -16,12 +17,18 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import com.app.myapp.Class.User;
 import com.app.myapp.R;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 public class Login extends AppCompatActivity {
     private FirebaseAuth mAuth;
@@ -33,10 +40,10 @@ public class Login extends AppCompatActivity {
     @Override
     public void onStart() {
         super.onStart();
+        mAuth = FirebaseAuth.getInstance();
         FirebaseUser currentUser = mAuth.getCurrentUser();
         if(currentUser != null){
-            startActivity(new Intent(Login.this, MainActivity.class));
-            finish();
+            checkUserRoleAndRedirect(currentUser.getUid());
         }
     }
 
@@ -63,7 +70,6 @@ public class Login extends AppCompatActivity {
     }
 
     private void initView() {
-
         btLogin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -71,11 +77,9 @@ public class Login extends AppCompatActivity {
                 String login, password;
                 login = String.valueOf(txtLogin.getText().toString().trim());
                 password = String.valueOf(txtMatKhau.getText().toString().trim());
-                if (txtLogin.getText().toString().isEmpty() ||
-                        txtMatKhau.getText().toString().isEmpty()) {
+                if (txtLogin.getText().toString().isEmpty() || txtMatKhau.getText().toString().isEmpty()) {
                     progressBar.setVisibility(View.GONE);
-                    Toast.makeText(Login.this,
-                            "Hãy nhập Tên Tài Khoản và Mật Khẩu!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(Login.this, "Hãy nhập Tên Tài Khoản và Mật Khẩu!", Toast.LENGTH_SHORT).show();
                     return;
                 } else {
                     mAuth.signInWithEmailAndPassword(login, password)
@@ -84,15 +88,10 @@ public class Login extends AppCompatActivity {
                                 public void onComplete(@NonNull Task<AuthResult> task) {
                                     progressBar.setVisibility(View.GONE);
                                     if (task.isSuccessful()) {
-                                        FirebaseUser user = mAuth.getCurrentUser();
-                                        // Đăng nhập thành công, cập nhật giao diện với thông tin người dùng
-                                        Toast.makeText(Login.this, "Đăng Nhập Thành Công!",
-                                                Toast.LENGTH_SHORT).show();
-                                        startActivity(new Intent(Login.this, MainActivity.class));
-                                        finish();
+                                        String userId = mAuth.getCurrentUser().getUid();
+                                        checkUserRoleAndRedirect(userId);
                                     } else {
-                                        Toast.makeText(Login.this, "Đăng Nhập Thất Bại",
-                                                Toast.LENGTH_SHORT).show();
+                                        Toast.makeText(Login.this, "Đăng Nhập Thất Bại", Toast.LENGTH_SHORT).show();
                                     }
                                 }
                             });
@@ -113,6 +112,35 @@ public class Login extends AppCompatActivity {
             public void onClick(View view) {
                 startActivity(new Intent(Login.this, ForgotPassword.class));
                 finish();
+            }
+        });
+    }
+
+    private void checkUserRoleAndRedirect(String userId) {
+        FirebaseDatabase database = FirebaseDatabase.getInstance();
+        DatabaseReference userRef = database.getReference("User").child(userId);
+
+        userRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                User user = snapshot.getValue(User.class);
+                if (user != null) {
+                    if (user.isRole()) {
+                        // Chuyển sang AdminMainActivity nếu người dùng là admin
+                        startActivity(new Intent(Login.this, AdminMainActivity.class));
+                    } else {
+                        // Chuyển sang MainActivity nếu người dùng là customer
+                        startActivity(new Intent(Login.this, MainActivity.class));
+                    }
+                    finish();
+                } else {
+                    Toast.makeText(Login.this, "Lỗi: Không tìm thấy thông tin người dùng", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Toast.makeText(Login.this, "Lỗi: " + error.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
     }

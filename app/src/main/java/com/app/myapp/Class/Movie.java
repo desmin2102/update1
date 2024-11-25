@@ -1,21 +1,15 @@
 package com.app.myapp.Class;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.List;
 
 public class Movie {
     private String id;
     private String title;
     private String duration;
     private String movieDateStart;
-    private String movieDateEnd;
     private String genre;
     private String rating;
     private String summary;
     private String trailerUrl;
-    private String imageUrl; // Thêm thuộc tính imageUrl
-//    private List<Review> userReviews;
+    private String imageUrl;
 
     public Movie() {
         // Constructor mặc định
@@ -30,12 +24,10 @@ public class Movie {
         this.rating = rating;
         this.summary = summary;
         this.trailerUrl = trailerUrl;
-        this.imageUrl = imageUrl; // Khởi tạo thuộc tính imageUrl
-//        this.userReviews = userReviews;
+        this.imageUrl = imageUrl;
     }
 
-    // Các phương thức getter và setter
-
+    // Getters và Setters
     public String getId() {
         return id;
     }
@@ -67,7 +59,6 @@ public class Movie {
     public void setMovieDateStart(String movieDateStart) {
         this.movieDateStart = movieDateStart;
     }
-
 
     public String getGenre() {
         return genre;
@@ -108,32 +99,4 @@ public class Movie {
     public void setImageUrl(String imageUrl) {
         this.imageUrl = imageUrl;
     }
-
-//    public List<Review> getUserReviews() {
-//        return userReviews;
-//    }
-//
-//    public void setUserReviews(List<Review> userReviews) {
-//        this.userReviews = userReviews;
-//    }
-
-//    // Phương thức kiểm tra trạng thái chiếu của phim
-//    public String getMovieStatus() throws ParseException {
-//        SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/YYYY");
-//        Date currentDate = new Date();
-//        Date startDate = dateFormat.parse(movieDateStart);
-//        Date endDate = dateFormat.parse(movieDateEnd);
-//
-//        if (currentDate.before(startDate)) {
-//            // Trả về ngày bắt đầu chiếu nếu phim sắp chiếu
-//            return "Sắp chiếu";
-//        } else if (currentDate.after(endDate)) {
-//            // Trả về ngày kết thúc chiếu nếu phim đã kết thúc chiếu
-//            return "Đã kết thúc chiếu";
-//        } else {
-//            // Trả về ngày hiện tại nếu phim đang chiếu
-//            return "Đang chiếu";
-//        }
-//    }
-
 }

@@ -1,8 +1,10 @@
 [versions]
 drawerlayout = "1.2.0"
+firebaseAppcheckPlayintegrity = "18.0.0"
+glideTransformations = "4.3.0"
 googleGmsGoogleServices = "4.4.2"
 agp = "8.7.2"
-firebaseAuth = "23.1.0"
+firebaseAuth = "21.0.8"
 firebaseBom = "33.5.1"
 junit = "4.13.2"
 junitVersion = "1.2.1"
@@ -26,8 +28,10 @@ firebaseFunctions = "21.0.0"
 [libraries]
 drawerlayout = { module = "androidx.drawerlayout:drawerlayout", version.ref = "drawerlayout" }
 firebase-analytics = { module = "com.google.firebase:firebase-analytics" }
+firebase-appcheck-playintegrity = { module = "com.google.firebase:firebase-appcheck-playintegrity", version.ref = "firebaseAppcheckPlayintegrity" }
 firebase-auth = { module = "com.google.firebase:firebase-auth", version.ref = "firebaseAuth" }
 firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBom" }
+glide-transformations = { module = "jp.wasabeef:glide-transformations", version.ref = "glideTransformations" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 ext-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }

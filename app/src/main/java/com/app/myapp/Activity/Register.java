@@ -16,25 +16,28 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import com.app.myapp.Class.User;
 import com.app.myapp.R;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
-import com.google.firebase.FirebaseApp;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 public class Register extends AppCompatActivity {
 
     private EditText txtSoDienThoai, txtEmail, txtMatKhauDK;
     private CheckBox checkBoxDieuKhoan;
-    Button btDangKy2;
-    FirebaseAuth mAuth;
-    ProgressBar progressBar;
+    private Button btDangKy2;
+    private FirebaseAuth mAuth;
+    private ProgressBar progressBar;
 
     @Override
     public void onStart() {
         super.onStart();
+        mAuth = FirebaseAuth.getInstance();
         FirebaseUser currentUser = mAuth.getCurrentUser();
         if (currentUser != null) {
             startActivity(new Intent(Register.this, MainActivity.class));
@@ -63,20 +66,17 @@ public class Register extends AppCompatActivity {
     }
 
     private void initView() {
-
         btDangKy2.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 progressBar.setVisibility(View.VISIBLE);
-                String email, password;
-                email = String.valueOf(txtEmail.getText().toString().trim());
-                password = String.valueOf(txtMatKhauDK.getText().toString().trim());
-                if (txtSoDienThoai.getText().toString().isEmpty() ||
-                        txtEmail.getText().toString().isEmpty() ||
-                        txtMatKhauDK.getText().toString().isEmpty()) {
-                    Toast.makeText(Register.this,
-                            "Hãy nhập Số điện thoại,Email và Mật Khẩu!",
-                            Toast.LENGTH_SHORT).show();
+                String email = txtEmail.getText().toString().trim();
+                String password = txtMatKhauDK.getText().toString().trim();
+                String phone = txtSoDienThoai.getText().toString().trim();
+
+                if (phone.isEmpty() || email.isEmpty() || password.isEmpty()) {
+                    progressBar.setVisibility(View.GONE);
+                    Toast.makeText(Register.this, "Hãy nhập Số điện thoại, Email và Mật Khẩu!", Toast.LENGTH_SHORT).show();
                     return;
                 } else if (!checkBoxDieuKhoan.isChecked()) {
                     progressBar.setVisibility(View.GONE);
@@ -87,22 +87,36 @@ public class Register extends AppCompatActivity {
                             .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
                                 @Override
                                 public void onComplete(@NonNull Task<AuthResult> task) {
-                                    //Vượt qua tiến trình để làm
                                     progressBar.setVisibility(View.GONE);
                                     if (task.isSuccessful()) {
-                                        //FirebaseUser user = mAuth.getCurrentUser();; //phương thức getCurrentUser để lấy dữ liệu tài khoản của người dùng.
-                                        Toast.makeText(Register.this, "Tạo Tài Khoản Thành Công!",
-                                                Toast.LENGTH_SHORT).show();
-                                        startActivity(new Intent(Register.this, Login.class));
-                                        finish();
+                                        FirebaseUser currentUser = mAuth.getCurrentUser();
+                                        if (currentUser != null) {
+                                            String userId = currentUser.getUid(); // Sử dụng UID từ Firebase Authentication
+                                            saveUserToDatabase(userId, email, phone, password, false);
+                                        }
                                     } else {
-                                        // If sign in fails, display a message to the user.
-                                        Toast.makeText(Register.this, "Thất Bại",
-                                                Toast.LENGTH_SHORT).show();
+                                        Toast.makeText(Register.this, "Thất Bại", Toast.LENGTH_SHORT).show();
                                     }
                                 }
                             });
                 }
+            }
+        });
+    }
+
+    private void saveUserToDatabase(String userId, String email, String phone, String password, boolean role) {
+        FirebaseDatabase database = FirebaseDatabase.getInstance();
+        DatabaseReference usersRef = database.getReference("User");
+
+        User user = new User(userId, email, phone, password, role); // Gán vai trò "customer"
+        usersRef.child(userId).setValue(user).addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                Toast.makeText(Register.this, "Tạo Tài Khoản Thành Công!", Toast.LENGTH_SHORT).show();
+                // Chuyển hướng đến trang MainActivity
+                startActivity(new Intent(Register.this, MainActivity.class));
+                finish();
+            } else {
+                Toast.makeText(Register.this, "Lưu thông tin người dùng thất bại", Toast.LENGTH_SHORT).show();
             }
         });
     }

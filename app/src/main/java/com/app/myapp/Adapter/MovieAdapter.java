@@ -43,8 +43,7 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
     @Override
     public void onBindViewHolder(@NonNull MovieAdapter.MovieViewHolder movieViewHolder, int i) {
         movieViewHolder.setImage(movieList.get(i));
-        if(i==movieList.size()-3)
-        {
+        if (i == movieList.size() - 3) {
             viewPager2.post(movieViewHolder.runnable);
         }
     }
@@ -62,6 +61,7 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
             this.imageViewmv = itemView.findViewById(R.id.movie_item_image);
         }
 
+        @SuppressWarnings("unchecked")
         void setImage(final Movie movie) {
             RequestOptions requestOptions = new RequestOptions();
             requestOptions = requestOptions.transform(new CenterCrop(), new RoundedCorners(60));
@@ -80,7 +80,8 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
                 }
             });
         }
-        private Runnable runnable=new Runnable() {
+
+        private Runnable runnable = new Runnable() {
             @Override
             public void run() {
                 movieList.addAll(movieList);

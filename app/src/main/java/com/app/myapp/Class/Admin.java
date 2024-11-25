@@ -1,58 +1,27 @@
 package com.app.myapp.Class;
 
-import java.util.List;
+public class Admin extends User {
 
-public class Admin {
-    // Methods to manage ads, movies, and shows
-
-    public void addAd(Ad ad) {
-        // Implementation here
+    // Constructor mặc định
+    public Admin() {
+        super();
     }
 
-    public void removeAd(int adId) {
-        // Implementation here
+    // Constructor với các tham số
+    public Admin(String userId, String email, String phone, String password, Boolean role) {
+        super(userId, email, phone, password, role);
     }
 
-    public void updateAd(Ad ad) {
-        // Implementation here
+    // Các phương thức quản trị (ví dụ)
+    public void manageUsers() {
+        // Logic quản lý người dùng
     }
 
-    public void addMovie(Movie movie) {
-        // Implementation here
+    public void viewReports() {
+        // Logic xem báo cáo
     }
 
-    public void removeMovie(String movieTitle) {
-        // Implementation here
-    }
-
-    public void updateMovie(Movie movie) {
-        // Implementation here
-    }
-
-    public void addShow(Show show) {
-        // Implementation here
-    }
-
-    public void removeShow(String showId) {
-        // Implementation here
-    }
-
-    public void updateShow(Show show) {
-        // Implementation here
-    }
-
-    public List<Ad> getAds() {
-        // Implementation here
-        return null; // This should be replaced with actual implementation
-    }
-
-    public List<Movie> getMovies() {
-        // Implementation here
-        return null; // This should be replaced with actual implementation
-    }
-
-    public List<Show> getShows() {
-        // Implementation here
-        return null; // This should be replaced with actual implementation
+    public void adjustSettings() {
+        // Logic điều chỉnh cài đặt
     }
 }

@@ -19,7 +19,6 @@ import com.app.myapp.R;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 
 public class ForgotPassword extends AppCompatActivity {
     private ProgressBar progressBar;

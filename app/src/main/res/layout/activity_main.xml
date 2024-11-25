@@ -1,4 +1,4 @@
-<androidx.constraintlayout.widget.ConstraintLayout
+<androidx.drawerlayout.widget.DrawerLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -6,128 +6,162 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@android:color/black"
+    android:fitsSystemWindows="true"
+    tools:openDrawer="start"
     tools:context=".Activity.MainActivity">
 
-    <ScrollView
+    <ImageView android:id="@+id/backgroundImageView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:layout_editor_absoluteX="0dp"
-        tools:layout_editor_absoluteY="0dp">
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
-
-
-            <androidx.constraintlayout.widget.ConstraintLayout
-                android:layout_width="match_parent"
-                android:layout_height="50dp"
-                android:layout_marginBottom="10dp"
-                >
-
-                <ImageView
-                    android:id="@+id/menu_icon"
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
-                    android:layout_alignParentEnd="true"
-                    android:layout_marginEnd="24dp"
-                    android:src="@drawable/ic_account"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:layout_constraintVertical_bias="1.0"></ImageView>
-            </androidx.constraintlayout.widget.ConstraintLayout>
-
-            <androidx.constraintlayout.widget.ConstraintLayout
-                android:layout_width="match_parent"
-                android:layout_height="180dp"
-                android:layout_marginBottom="16dp">
-
-                <androidx.viewpager2.widget.ViewPager2
-
-                    android:id="@+id/viewPager_quangcao"
-                    android:layout_width="300dp"
-                    android:layout_height="140dp"
-                    android:contentDescription="@string/action_account"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:layout_constraintVertical_bias="0.5"
-                    tools:ignore="SpeakableTextPresentCheck" />
-
-
-                <me.relex.circleindicator.CircleIndicator3
-                    android:id="@+id/circleIndicator"
-                    android:layout_width="match_parent"
-                    android:layout_height="20dp"
-                    app:layout_constraintTop_toBottomOf="@id/viewPager_quangcao"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    android:layout_marginTop="0dp"
-                    android:layout_marginBottom="0dp"
-                    android:paddingTop="10dp"
-
-                    />
-            </androidx.constraintlayout.widget.ConstraintLayout>
-
-            <androidx.constraintlayout.widget.ConstraintLayout
-                android:layout_width="match_parent"
-                android:layout_height="500dp"
-                android:layout_marginBottom="16dp">
-
-                <androidx.viewpager2.widget.ViewPager2
-                    android:id="@+id/viewPager_movie"
-                    android:layout_width="300dp"
-                    android:layout_height="400dp"
-                    app:layout_constraintBottom_toBottomOf="@id/viewPager_movie"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintVertical_bias="0.5"
-                    app:layout_constraintStart_toStartOf="parent">
-                </androidx.viewpager2.widget.ViewPager2>
-
-                <Button
-                    android:id="@+id/button"
-                    android:layout_width="332dp"
-                    android:layout_height="63dp"
-                    android:text="Booking"
-                    app:layout_constraintTop_toBottomOf="@id/viewPager_movie"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    />
-
-            </androidx.constraintlayout.widget.ConstraintLayout>
-
-        </LinearLayout>
-    </ScrollView>
-
+        android:scaleType="centerCrop"
+        android:alpha="0.5" />
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/bottomMenuContainer"
-        android:layout_width="350dp"
-        android:layout_height="0dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent">
-        <com.google.android.material.bottomnavigation.BottomNavigationView
-            android:id="@+id/bottomNavigationView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <ScrollView
+            android:id="@+id/scView"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="@drawable/edit_background_radious"
+            tools:layout_editor_absoluteX="0dp"
+            tools:layout_editor_absoluteY="0dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="60dp">
+
+                    <ImageView
+                        android:id="@+id/imageAccount"
+                        android:layout_width="60dp"
+                        android:layout_height="40dp"
+                        android:src="@drawable/ic_account"
+                        app:itemIconSize="40dp"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintHorizontal_bias="0.014"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <TextView
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="HGB Cinema"
+                        android:textSize="30sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/Pink"
+                        tools:layout_editor_absoluteX="120dp"
+                        tools:layout_editor_absoluteY="10dp"></TextView>
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="180dp"
+                    android:layout_marginBottom="16dp">
+
+                    <androidx.viewpager2.widget.ViewPager2
+
+                        android:id="@+id/viewPager_quangcao"
+                        android:layout_width="300dp"
+                        android:layout_height="140dp"
+                        android:contentDescription="@string/action_account"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintVertical_bias="0.5"
+                        tools:ignore="SpeakableTextPresentCheck" />
+
+
+                    <me.relex.circleindicator.CircleIndicator3
+                        android:id="@+id/circleIndicator"
+                        android:layout_width="match_parent"
+                        android:layout_height="20dp"
+                        android:layout_marginTop="0dp"
+                        android:layout_marginBottom="0dp"
+                        android:paddingTop="10dp"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/viewPager_quangcao"
+
+                        />
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="500dp"
+                    android:layout_marginBottom="16dp">
+
+                    <androidx.viewpager2.widget.ViewPager2
+                        android:id="@+id/viewPager_movie"
+                        android:layout_width="match_parent"
+                        android:layout_height="400dp"
+                        android:paddingStart="60dp"
+                        android:paddingEnd="60dp"
+                        app:layout_constraintBottom_toBottomOf="@id/viewPager_movie"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintHorizontal_bias="0.0"
+                        app:layout_constraintStart_toStartOf="parent">
+
+                    </androidx.viewpager2.widget.ViewPager2>
+
+                    <Button
+                        android:id="@+id/button"
+                        android:layout_width="332dp"
+                        android:layout_height="63dp"
+                        android:text="Booking"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/viewPager_movie" />
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+            </LinearLayout>
+        </ScrollView>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/bottomMenuContainer"
+            android:layout_width="350dp"
+            android:layout_height="0dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:menu="@menu/bottom_menu"
-            app:itemIconSize="40dp"
-            app:itemPadding="0dp"
-            app:itemHorizontalTranslationEnabled="false"
-            app:labelVisibilityMode="unlabeled"
-            app:itemIconTint="@color/white"
-            />
-    </androidx.constraintlayout.widget.ConstraintLayout>
+            app:layout_constraintStart_toStartOf="parent">
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+            <com.google.android.material.bottomnavigation.BottomNavigationView
+                android:id="@+id/bottomNavigationView"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@drawable/edit_background_radious"
+                app:itemHorizontalTranslationEnabled="false"
+                app:itemIconSize="40dp"
+                app:itemIconTint="@color/white"
+                app:itemPadding="0dp"
+                app:labelVisibilityMode="unlabeled"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:menu="@menu/bottom_menu" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+    <com.google.android.material.navigation.NavigationView
+        android:id="@+id/nav_view"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_gravity="start"
+        app:headerLayout="@layout/nav_header"
+        app:itemIconTint="@null"
+        app:itemTextColor="@color/black"
+        app:menu="@menu/nav_menu" />
+</androidx.drawerlayout.widget.DrawerLayout>
 
 
 

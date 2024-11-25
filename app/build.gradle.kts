@@ -16,6 +16,9 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
+    tasks.withType<JavaCompile> {
+        options.compilerArgs.addAll(listOf("-Xlint:deprecation", "-Xlint:unchecked"))
+    }
 
     buildTypes {
         release {
@@ -45,6 +48,7 @@ dependencies {
     implementation(libs.retrofit)
     implementation(libs.glide)
     implementation (libs.picasso)
+    implementation (libs.glide.transformations)
 
 
     testImplementation(libs.junit)

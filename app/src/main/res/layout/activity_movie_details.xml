@@ -72,8 +72,6 @@
                 android:textSize="18sp"
                 android:layout_marginLeft="15dp"/>
 
-
-
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

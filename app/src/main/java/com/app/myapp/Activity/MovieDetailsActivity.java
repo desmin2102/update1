@@ -105,6 +105,7 @@ public class MovieDetailsActivity extends AppCompatActivity {
                 if (dateStart != null) {
                     movieDateStartTextView.setText(dateStart);
                 }
+
                 if (genre != null) {
                     movieGenreTextView.setText(genre);
                 }

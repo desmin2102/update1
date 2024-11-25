@@ -56,6 +56,7 @@ public class AdAdapter extends RecyclerView.Adapter<AdAdapter.AdViewHolder> {
             this.imageViewad = itemView.findViewById(R.id.ad_item_image);
         }
 
+        @SuppressWarnings("unchecked")
         void setImage(final Ad ad) {
             RequestOptions requestOptions = new RequestOptions();
             requestOptions = requestOptions.transform(new CenterCrop(), new RoundedCorners(60));
@@ -75,4 +76,5 @@ public class AdAdapter extends RecyclerView.Adapter<AdAdapter.AdViewHolder> {
             });
         }
     }
+
 }
