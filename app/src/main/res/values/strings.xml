@@ -11,4 +11,6 @@
     <string name="search_movie">Search movie</string>
     <string name="phim_moi">Phim mới</string>
     <string name="phim_sap_chieu">Phim sắp chiếu</string>
+    <string name="Ten_Dang_nhap">Email hoặc số điện thoại</string>
+    <string name="password">Mật khẩu</string>
 </resources>
