@@ -1,22 +1,21 @@
 package com.app.myapp.Activity;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
 import android.view.View;
-import android.widget.Adapter;
 import android.widget.Button;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.viewpager2.widget.CompositePageTransformer;
+import androidx.viewpager2.widget.MarginPageTransformer;
 import androidx.viewpager2.widget.ViewPager2;
 
 import com.app.myapp.Adapter.AdAdapter;
 import com.app.myapp.Adapter.MovieAdapter;
 import com.app.myapp.Class.Ad;
-import com.app.myapp.Class.Cinema;
-import com.app.myapp.Class.CinemaHall;
 import com.app.myapp.Class.Movie;
 import com.app.myapp.R;
 import com.google.firebase.database.DataSnapshot;
@@ -67,11 +66,10 @@ public class MainActivity extends AppCompatActivity {
         // Thiết lập ViewPager
         setupViewPagerAd();
         // Lấy dữ liệu từ Firebase
+        setupViewPagerMovie();
         fetchAdsFromDatabase();
 
         fetchMoviesFromDatabase();
-
-        setupBookingButton();
 
         saveData();
     }
@@ -109,23 +107,21 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    private void setupViewPagerMovie()
-    {
-        viewPagermv.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
-            @Override
-            public void onPageSelected(int position) {
-                super.onPageSelected(position);
-                if(position==listMovie.size()-1)
-                {
-                    viewPagermv.post(new Runnable() {
-                        @Override
-                        public void run() {
-                                viewPagermv.setCurrentItem(0,false);
-                        }
-                    });
-                }
-            }
+    private void setupViewPagerMovie() {
+        mvAdapter = new MovieAdapter(listMovie, viewPagermv);
+        viewPagermv.setAdapter(mvAdapter);
+        viewPagermv.setClipToPadding(false);
+        viewPagermv.setClipChildren(false);
+        viewPagermv.setOffscreenPageLimit(4);
+        viewPagermv.getChildAt(0).setOverScrollMode(RecyclerView.OVER_SCROLL_NEVER);
+        CompositePageTransformer compositePageTransformer = new CompositePageTransformer();
+        compositePageTransformer.addTransformer(new MarginPageTransformer(60)); // Điều chỉnh khoảng cách
+        compositePageTransformer.addTransformer((view, v) -> {
+            float r = 1 - Math.abs(v);
+            view.setScaleY(0.85f + r * 0.15f);
         });
+        viewPagermv.setPageTransformer(compositePageTransformer);
+        viewPagermv.setCurrentItem(mvAdapter.getItemCount() / 2, false);
     }
 
     private void fetchAdsFromDatabase() {
@@ -163,8 +159,7 @@ public class MainActivity extends AppCompatActivity {
                     Movie movie = snapshot.getValue(Movie.class);
                     listMovie.add(movie);
                 }
-                mvAdapter= new MovieAdapter(listMovie, MainActivity.this); // Truyền context
-                viewPagermv.setAdapter(mvAdapter);
+                mvAdapter.notifyDataSetChanged();
             }
 
             @Override
@@ -187,24 +182,10 @@ public class MainActivity extends AppCompatActivity {
         handler.postDelayed(runnable, 3000);
     }
 
-    //Button Boking
-    private void setupBookingButton() {
-        Button bookingButton = findViewById(R.id.button);
-        bookingButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                openSelectLocationActivity();
-            }
-        });
-    }
-
-    private void openSelectLocationActivity() {
-        Intent intent = new Intent(MainActivity.this, SelectLocationActivity.class);
-        startActivity(intent);
-    }
 
     private void saveData() {
         FirebaseDatabase database = FirebaseDatabase.getInstance();
         DatabaseReference myRef = database.getReference();
+
     } }
 

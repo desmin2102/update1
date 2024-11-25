@@ -9,6 +9,7 @@ import android.widget.ImageView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.viewpager2.widget.ViewPager2;
 
 import com.app.myapp.Activity.MovieDetailsActivity;
 import com.app.myapp.Class.Movie;
@@ -23,10 +24,11 @@ import java.util.List;
 public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHolder> {
     private List<Movie> movieList;
     private Context context;
+    private ViewPager2 viewPager2;
 
-    public MovieAdapter(List<Movie> movieList, Context context) {
+    public MovieAdapter(List<Movie> movieList, ViewPager2 viewPager2) {
         this.movieList = movieList;
-        this.context = context;
+        this.viewPager2 = viewPager2;
     }
 
     @NonNull
@@ -41,6 +43,10 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
     @Override
     public void onBindViewHolder(@NonNull MovieAdapter.MovieViewHolder movieViewHolder, int i) {
         movieViewHolder.setImage(movieList.get(i));
+        if(i==movieList.size()-3)
+        {
+            viewPager2.post(movieViewHolder.runnable);
+        }
     }
 
     @Override
@@ -74,5 +80,12 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
                 }
             });
         }
+        private Runnable runnable=new Runnable() {
+            @Override
+            public void run() {
+                movieList.addAll(movieList);
+                notifyDataSetChanged();
+            }
+        };
     }
 }

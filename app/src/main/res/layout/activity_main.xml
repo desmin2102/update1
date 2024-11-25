@@ -80,13 +80,13 @@
 
                 <androidx.viewpager2.widget.ViewPager2
                     android:id="@+id/viewPager_movie"
-                    android:layout_width="300dp"
+                    android:layout_width="match_parent"
                     android:layout_height="400dp"
+                    android:paddingStart="60dp"
+                    android:paddingEnd="60dp"
                     app:layout_constraintBottom_toBottomOf="@id/viewPager_movie"
                     app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintVertical_bias="0.5"
-                    app:layout_constraintStart_toStartOf="parent">
-                </androidx.viewpager2.widget.ViewPager2>
+                    app:layout_constraintStart_toStartOf="parent"></androidx.viewpager2.widget.ViewPager2>
 
                 <Button
                     android:id="@+id/button"
