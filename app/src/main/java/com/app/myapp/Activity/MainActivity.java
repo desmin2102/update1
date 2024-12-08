@@ -3,11 +3,16 @@ package com.app.myapp.Activity;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.Toolbar;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.widget.CompositePageTransformer;
 import androidx.viewpager2.widget.MarginPageTransformer;
@@ -18,6 +23,10 @@ import com.app.myapp.Adapter.MovieAdapter;
 import com.app.myapp.Class.Ad;
 import com.app.myapp.Class.Movie;
 import com.app.myapp.R;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.navigation.NavigationView;
+import com.google.firebase.FirebaseApp;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -32,6 +41,15 @@ import java.util.List;
 import me.relex.circleindicator.CircleIndicator3;
 
 public class MainActivity extends AppCompatActivity {
+    public   static final  int MY_REQUEST_CODE =10;
+
+    private  static final  int Fragment_PhimDaXem=0;
+    private  static final  int Fragment_VecuaTui=1;
+    private  static final  int Fragment_ThongTinThanhVien=2;
+    private  static final  int Fragment_ChinhSachTichDiem=3;
+    private  static final  int Fragment_ChangePassWord=4;
+
+    private int mCurrentFragment = 0;
 
     private ViewPager2 viewPagerqc;
     private ViewPager2 viewPagermv;
@@ -46,13 +64,22 @@ public class MainActivity extends AppCompatActivity {
     private List<Ad> listAd = new ArrayList<>();
     private List<Movie> listMovie=new ArrayList<>();
 
+    private DrawerLayout drawerLayout;
+    private FloatingActionButton fab;
+    private BottomNavigationView bottomNavigationView;
+    private  NavigationView nav_View;
+
+
 
     private Button buttonBooking;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        FirebaseApp.initializeApp(this);
         init();
+
     }
 
     // Hàm khởi tạo
@@ -69,6 +96,8 @@ public class MainActivity extends AppCompatActivity {
         setupViewPagerMovie();
         fetchAdsFromDatabase();
 
+
+
         fetchMoviesFromDatabase();
 
         saveData();
@@ -81,7 +110,6 @@ public class MainActivity extends AppCompatActivity {
     private void initializeViewsMovie() {
         viewPagermv = findViewById(R.id.viewPager_movie);
     }
-
     private void setupAutoSlideImages() {
         runnable = new Runnable() {
             @Override
@@ -169,6 +197,19 @@ public class MainActivity extends AppCompatActivity {
             }
 
         });
+    }
+
+    //@Override
+    private boolean onNavigationItemSelected(@NonNull MenuItem item){
+        int id= item.getItemId();
+       if(id==R.id.nav_change){
+           if(mCurrentFragment!= Fragment_ChangePassWord){
+               //replaceFragment(new ChangePassword());
+               mCurrentFragment=Fragment_ChangePassWord;
+           }
+       }
+       drawerLayout.closeDrawer(GravityCompat.START);
+       return true;
     }
     @Override
     protected void onDestroy() {

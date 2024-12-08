@@ -13,4 +13,12 @@
     <string name="phim_sap_chieu">Phim sắp chiếu</string>
     <string name="Ten_Dang_nhap">Email hoặc số điện thoại</string>
     <string name="password">Mật khẩu</string>
+    <string name="changepassword1">Mật khẩu mới</string>
+    <string name="changepassword2">Nhập lại mật khẩu</string>
+    <string name="phim_da_xem">Phim đã xem</string>
+    <string name="ve_cua_toi">Vé của tôi</string>
+    <string name="thong_tin_thanh_vien">Thông tin thành viên</string>
+    <string name="chinh_sach_tich_diem">Chính sách tích điểm</string>
+    <string name="open_nav">Open Navigation Drawer</string>
+    <string name="close_nav">Close Navigation Drawer</string>
 </resources>

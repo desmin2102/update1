@@ -3,4 +3,7 @@
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
     <color name="newcolor">#363636</color>
+    <color name="Pink">#FB9590</color>
+    <color name="lightorange">#F6BCBA</color>
+    <color name="transparent">#00000000</color>
 </resources>

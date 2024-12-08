@@ -20,24 +20,14 @@
             android:orientation="vertical">
 
 
-            <androidx.constraintlayout.widget.ConstraintLayout
+            <androidx.appcompat.widget.Toolbar
+                android:id="@+id/toolbarMain"
                 android:layout_width="match_parent"
-                android:layout_height="50dp"
+                android:layout_height="48dp"
                 android:layout_marginBottom="10dp"
-                >
-
-                <ImageView
-                    android:id="@+id/menu_icon"
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
-                    android:layout_alignParentEnd="true"
-                    android:layout_marginEnd="24dp"
-                    android:src="@drawable/ic_account"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:layout_constraintVertical_bias="1.0"></ImageView>
-            </androidx.constraintlayout.widget.ConstraintLayout>
+                android:elevation="4dp"
+                android:popupTheme="@style/ThemeOverlay.AppCompat.Light"
+                android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar" />
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
@@ -86,17 +76,19 @@
                     android:paddingEnd="60dp"
                     app:layout_constraintBottom_toBottomOf="@id/viewPager_movie"
                     app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"></androidx.viewpager2.widget.ViewPager2>
+                    app:layout_constraintHorizontal_bias="0.0"
+                    app:layout_constraintStart_toStartOf="parent">
+
+                </androidx.viewpager2.widget.ViewPager2>
 
                 <Button
                     android:id="@+id/button"
                     android:layout_width="332dp"
                     android:layout_height="63dp"
                     android:text="Booking"
-                    app:layout_constraintTop_toBottomOf="@id/viewPager_movie"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    />
+                    app:layout_constraintTop_toBottomOf="@id/viewPager_movie" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -123,9 +115,23 @@
             app:itemPadding="0dp"
             app:itemHorizontalTranslationEnabled="false"
             app:labelVisibilityMode="unlabeled"
-            app:itemIconTint="@color/white"
-            />
+            app:itemIconTint="@color/white" />
     </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <com.google.android.material.navigation.NavigationView
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:id="@+id/nav_view"
+        android:layout_gravity="start"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:headerLayout="@layout/nav_header"
+        app:menu="@menu/nav_menu"
+        app:itemIconTint="@null"
+        app:itemTextColor="@color/black"/>
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>
 
