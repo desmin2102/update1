@@ -1,12 +1,14 @@
 package com.app.myapp.Activity;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
-import android.widget.Toolbar;
+
+import androidx.appcompat.widget.Toolbar;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
@@ -18,6 +20,12 @@ import androidx.viewpager2.widget.CompositePageTransformer;
 import androidx.viewpager2.widget.MarginPageTransformer;
 import androidx.viewpager2.widget.ViewPager2;
 
+import android.os.Bundle;
+import android.view.MenuItem;
+import android.widget.Toast;
+
+import com.google.android.material.navigation.NavigationView;
+
 import com.app.myapp.Adapter.AdAdapter;
 import com.app.myapp.Adapter.MovieAdapter;
 import com.app.myapp.Class.Ad;
@@ -27,6 +35,7 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.FirebaseApp;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -40,14 +49,14 @@ import java.util.List;
 
 import me.relex.circleindicator.CircleIndicator3;
 
-public class MainActivity extends AppCompatActivity {
-    public   static final  int MY_REQUEST_CODE =10;
+public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
+    public static final int MY_REQUEST_CODE = 10;
 
-    private  static final  int Fragment_PhimDaXem=0;
-    private  static final  int Fragment_VecuaTui=1;
-    private  static final  int Fragment_ThongTinThanhVien=2;
-    private  static final  int Fragment_ChinhSachTichDiem=3;
-    private  static final  int Fragment_ChangePassWord=4;
+    private static final int Fragment_PhimDaXem = 0;
+    private static final int Fragment_VecuaTui = 1;
+    private static final int Fragment_ThongTinThanhVien = 2;
+    private static final int Fragment_ChinhSachTichDiem = 3;
+    private static final int Fragment_ChangePassWord = 4;
 
     private int mCurrentFragment = 0;
 
@@ -62,20 +71,40 @@ public class MainActivity extends AppCompatActivity {
     private MovieAdapter mvAdapter;
 
     private List<Ad> listAd = new ArrayList<>();
-    private List<Movie> listMovie=new ArrayList<>();
+    private List<Movie> listMovie = new ArrayList<>();
 
     private DrawerLayout drawerLayout;
-    private FloatingActionButton fab;
     private BottomNavigationView bottomNavigationView;
-    private  NavigationView nav_View;
-
 
 
     private Button buttonBooking;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        drawerLayout = findViewById(R.id.main);
+        Toolbar toolbarMain = findViewById(R.id.toolbarMain);
+        setSupportActionBar(toolbarMain);
+
+        // Thiết lập biểu tượng tùy chỉnh làm biểu tượng điều hướng
+        toolbarMain.setNavigationIcon(R.drawable.ic_account);
+        // Xử lý sự kiện nhấp vào biểu tượng điều hướng
+        toolbarMain.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // Mở ngăn kéo điều hướng
+                drawerLayout.openDrawer(GravityCompat.START);
+            }
+        });
+
+        NavigationView navigationView = findViewById(R.id.nav_view);
+        navigationView.setNavigationItemSelectedListener(this);
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawerLayout,
+                toolbarMain, R.string.open_nav, R.string.close_nav);
+        drawerLayout.addDrawerListener(toggle);
+        toggle.syncState();
 
         FirebaseApp.initializeApp(this);
         init();
@@ -96,20 +125,27 @@ public class MainActivity extends AppCompatActivity {
         setupViewPagerMovie();
         fetchAdsFromDatabase();
 
-
+        //khởi tạo nav_view
+        initializeViewsMenu();
 
         fetchMoviesFromDatabase();
 
         saveData();
     }
 
+    private void initializeViewsMenu() {
+        bottomNavigationView = findViewById(R.id.bottomNavigationView);
+    }
+
     private void initializeViewsAd() {
         viewPagerqc = findViewById(R.id.viewPager_quangcao);
         circleIndicator = findViewById(R.id.circleIndicator);
     }
+
     private void initializeViewsMovie() {
         viewPagermv = findViewById(R.id.viewPager_movie);
     }
+
     private void setupAutoSlideImages() {
         runnable = new Runnable() {
             @Override
@@ -199,18 +235,24 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    //@Override
-    private boolean onNavigationItemSelected(@NonNull MenuItem item){
-        int id= item.getItemId();
-       if(id==R.id.nav_change){
-           if(mCurrentFragment!= Fragment_ChangePassWord){
-               //replaceFragment(new ChangePassword());
-               mCurrentFragment=Fragment_ChangePassWord;
-           }
-       }
-       drawerLayout.closeDrawer(GravityCompat.START);
-       return true;
+    @Override
+    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+        // Xử lý các mục trong NavigationView tại đây
+        int id = item.getItemId();
+        if (id == R.id.nav_change) {
+            if (mCurrentFragment != Fragment_ChangePassWord) {
+                //replaceFragment(new ChangePassword());
+                mCurrentFragment = Fragment_ChangePassWord;
+            }
+        } else if (id == R.id.nav_logout) {
+            FirebaseAuth.getInstance().signOut();
+            startActivity(new Intent(this, Login.class));
+            finish();
+        }
+        drawerLayout.closeDrawer(GravityCompat.START);
+        return true;
     }
+
     @Override
     protected void onDestroy() {
         super.onDestroy();
@@ -228,5 +270,6 @@ public class MainActivity extends AppCompatActivity {
         FirebaseDatabase database = FirebaseDatabase.getInstance();
         DatabaseReference myRef = database.getReference();
 
-    } }
+    }
+}
 

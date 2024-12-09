@@ -15,7 +15,7 @@
         android:theme="@style/Theme.MyApp"
         tools:targetApi="31">
         <activity
-            android:name=".Activity.Account"
+            android:name=".Activity.ForgotPassword"
             android:exported="false" />
         <activity
             android:name=".Activity.ChangePassword"
@@ -24,12 +24,12 @@
             android:name=".Activity.Register"
             android:exported="false" />
         <activity
-            android:name=".Activity.MainActivity"
+            android:name=".Activity.Login"
             android:exported="false" />
         <activity android:name=".Activity.AdDetailsActivity" />
         <activity android:name=".Activity.MovieDetailsActivity" />
         <activity
-            android:name=".Activity.Login"
+            android:name=".Activity.MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

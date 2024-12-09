@@ -11,7 +11,7 @@
     <string name="search_movie">Search movie</string>
     <string name="phim_moi">Phim mới</string>
     <string name="phim_sap_chieu">Phim sắp chiếu</string>
-    <string name="Ten_Dang_nhap">Email hoặc số điện thoại</string>
+    <string name="Ten_Dang_nhap">Email</string>
     <string name="password">Mật khẩu</string>
     <string name="changepassword1">Mật khẩu mới</string>
     <string name="changepassword2">Nhập lại mật khẩu</string>
