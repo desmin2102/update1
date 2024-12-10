@@ -111,7 +111,7 @@ public class QuanLyPhimDetailActivity extends AppCompatActivity {
                 String movieId = FirebaseDatabase.getInstance().getReference("Movie").push().getKey();
 
                 // Tạo đối tượng Movie
-                Movie movie = new Movie(movieId, title, duration, movieDateStart, genre, "", summary, trailerUrl, imageUrl);
+                Movie movie = new Movie(movieId, title, duration, movieDateStart, genre, 0, summary, trailerUrl, imageUrl);
 
                 // Thêm vào Firebase
                 DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference("Movie");

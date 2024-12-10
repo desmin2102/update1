@@ -63,19 +63,19 @@ public class ForgotPassword extends AppCompatActivity {
                     // Lấy thông tin người dùng
                     mAuth.sendPasswordResetEmail(userEmail)
                             .addOnCompleteListener(new OnCompleteListener<Void>() {
-                                    @Override
-                                    public void onComplete(@NonNull Task<Void> task) {
-                                        progressBar.setVisibility(View.GONE);
-                                        if (task.isSuccessful()) {
-                                            Toast.makeText(ForgotPassword.this,
-                                                    "Đã gửi đến Email!", Toast.LENGTH_SHORT).show();
-                                            startActivity(new Intent(ForgotPassword.this,Login.class));
-                                            finish();
-                                        }else {
-                                            Toast.makeText(ForgotPassword.this,
-                                                    "Email không tồn tại", Toast.LENGTH_SHORT).show();
-                                        }
+                                @Override
+                                public void onComplete(@NonNull Task<Void> task) {
+                                    progressBar.setVisibility(View.GONE);
+                                    if (task.isSuccessful()) {
+                                        Toast.makeText(ForgotPassword.this,
+                                                "Đã gửi đến Email!", Toast.LENGTH_SHORT).show();
+                                        startActivity(new Intent(ForgotPassword.this,Login.class));
+                                        finish();
+                                    }else {
+                                        Toast.makeText(ForgotPassword.this,
+                                                "Email không tồn tại", Toast.LENGTH_SHORT).show();
                                     }
+                                }
                             });
                 }
             }

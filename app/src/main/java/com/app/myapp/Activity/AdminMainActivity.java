@@ -8,6 +8,8 @@ import android.widget.ImageView;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.app.myapp.R;
+import com.google.firebase.auth.FirebaseAuth;
+import android.content.SharedPreferences;
 
 public class AdminMainActivity extends AppCompatActivity {
     @Override
@@ -96,6 +98,15 @@ public class AdminMainActivity extends AppCompatActivity {
         imDangXuat.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                // Đăng xuất người dùng
+                FirebaseAuth.getInstance().signOut();
+
+                // Xóa thông tin người dùng trong SharedPreferences
+                SharedPreferences sharedPreferences = getSharedPreferences("MyAppPrefs", MODE_PRIVATE);
+                SharedPreferences.Editor editor = sharedPreferences.edit();
+                editor.clear();
+                editor.apply();
+
                 // Quay về màn hình login (Login)
                 Intent intent = new Intent(AdminMainActivity.this, Login.class);
                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK); // Đảm bảo thoát hoàn toàn khỏi AdminMainActivity

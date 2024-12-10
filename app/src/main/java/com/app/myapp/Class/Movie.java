@@ -8,7 +8,7 @@ public class Movie {
     private String duration;
     private String movieDateStart;
     private String genre;
-    private String rating;
+    private double rating;
     private String summary;
     private String trailerUrl;
     private String imageUrl;
@@ -17,7 +17,7 @@ public class Movie {
         // Constructor mặc định
     }
 
-    public Movie(String id, String title, String duration, String movieDateStart, String genre, String rating, String summary, String trailerUrl, String imageUrl) {
+    public Movie(String id, String title, String duration, String movieDateStart, String genre, double rating, String summary, String trailerUrl, String imageUrl) {
         this.id = id;
         this.title = title;
         this.duration = duration;
@@ -70,11 +70,11 @@ public class Movie {
         this.genre = genre;
     }
 
-    public String getRating() {
+    public double getRating() {
         return rating;
     }
 
-    public void setRating(String rating) {
+    public void setRating(double rating) {
         this.rating = rating;
     }
 

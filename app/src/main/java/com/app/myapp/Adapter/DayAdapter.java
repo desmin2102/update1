@@ -121,7 +121,7 @@ public class DayAdapter extends RecyclerView.Adapter<DayAdapter.DayViewHolder> {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
         String dateString = sdf.format(calendar.getTime());
 
-        sessionsRef.orderByChild("startTime").startAt(dateString).endAt(dateString + "\uf8ff").addListenerForSingleValueEvent(new ValueEventListener() {
+        sessionsRef.orderByChild("startDay").equalTo(dateString).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 List<MovieSession> movieSessions = new ArrayList<>();

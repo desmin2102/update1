@@ -8,12 +8,12 @@ import android.text.TextWatcher;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
-import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
+import androidx.activity.OnBackPressedCallback;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
@@ -67,10 +67,17 @@ public class Register extends AppCompatActivity {
         btDangKy2 = findViewById(R.id.btDangKy2);
         progressBar = findViewById(R.id.progressBar);
         mAuth = FirebaseAuth.getInstance();
+
         // Nút quay lại
         ImageView imBack = findViewById(R.id.imBack_register);
-        imBack.setOnClickListener(v -> finish());
-
+        imBack.setOnClickListener(v -> onBackPressed());
+        OnBackPressedCallback callback = new OnBackPressedCallback(true) {
+            @Override public void handleOnBackPressed() {
+                Intent intent = new Intent(Register.this, Login.class);
+                startActivity(intent);
+                finish();
+            }
+        }; getOnBackPressedDispatcher().addCallback(this, callback);
         initView();
     }
 
@@ -84,13 +91,13 @@ public class Register extends AppCompatActivity {
                 String password = txtMatKhauDK.getText().toString().trim();
                 String phone = txtSoDienThoai.getText().toString().trim();
 
-                if (ten.isEmpty() ||phone.isEmpty() || email.isEmpty() || password.isEmpty()) {
+                if (ten.isEmpty() || phone.isEmpty() || email.isEmpty() || password.isEmpty()) {
                     progressBar.setVisibility(View.GONE);
                     Toast.makeText(Register.this, "Hãy nhập Tên, Số điện thoại, Email và Mật Khẩu!", Toast.LENGTH_SHORT).show();
                     return;
                 } else if (!checkBoxDieuKhoan.isChecked()) {
                     progressBar.setVisibility(View.GONE);
-                    Toast.makeText(Register.this, "Không hợp lệ ", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(Register.this, "Không hợp lệ", Toast.LENGTH_SHORT).show();
                     return;
                 } else {
                     mAuth.createUserWithEmailAndPassword(email, password)
@@ -102,7 +109,7 @@ public class Register extends AppCompatActivity {
                                         FirebaseUser currentUser = mAuth.getCurrentUser();
                                         if (currentUser != null) {
                                             String userId = currentUser.getUid(); // Sử dụng UID từ Firebase Authentication
-                                            saveUserToDatabase(userId,ten, email, phone, password, false);
+                                            saveUserToDatabase(userId, ten, email, phone, password);
                                         }
                                     } else {
                                         Toast.makeText(Register.this, "Thất Bại", Toast.LENGTH_SHORT).show();
@@ -132,21 +139,29 @@ public class Register extends AppCompatActivity {
         });
     }
 
-    private void saveUserToDatabase(String userId,String ten, String email, String phone, String password, boolean role) {
+    private void saveUserToDatabase(String userId, String ten, String email, String phone, String password  ) {
         FirebaseDatabase database = FirebaseDatabase.getInstance();
         DatabaseReference usersRef = database.getReference("User");
 
-        User user = new User(userId, ten, email, phone, password, role); // Gán vai trò "customer"
+        User user = new User(userId, ten, email, phone, password, false); // Gán vai trò "customer"
         usersRef.child(userId).setValue(user).addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
                 Toast.makeText(Register.this, "Tạo Tài Khoản Thành Công!", Toast.LENGTH_SHORT).show();
                 // Chuyển hướng đến trang MainActivity
                 startActivity(new Intent(Register.this, MainActivity.class));
-                finishAffinity();//đóng tất cả activity trước MainActivity này
+                finishAffinity(); // Đóng tất cả activity trước MainActivity này
             } else {
                 Toast.makeText(Register.this, "Lưu thông tin người dùng thất bại", Toast.LENGTH_SHORT).show();
             }
         });
     }
 
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        // Điều hướng về màn hình đăng nhập khi người dùng nhấn nút quay lại
+        Intent intent = new Intent(Register.this, Login.class);
+        startActivity(intent);
+        finish();
+    }
 }

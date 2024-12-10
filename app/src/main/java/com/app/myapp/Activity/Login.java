@@ -1,8 +1,9 @@
 package com.app.myapp.Activity;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -12,6 +13,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
@@ -30,7 +32,6 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import android.content.SharedPreferences;
 
 public class Login extends AppCompatActivity {
     private FirebaseAuth mAuth;
@@ -43,10 +44,10 @@ public class Login extends AppCompatActivity {
     @Override
     public void onStart() {
         super.onStart();
+        sharedPreferences = getSharedPreferences("MyAppPrefs", MODE_PRIVATE);
         mAuth = FirebaseAuth.getInstance();
         FirebaseUser currentUser = mAuth.getCurrentUser();
-        boolean userLoggedOut = sharedPreferences.getBoolean("userLoggedOut", true);
-        if (currentUser != null && !userLoggedOut) {
+        if (currentUser != null) {
             checkUserRoleAndRedirect(currentUser.getUid());
         }
     }
@@ -61,6 +62,7 @@ public class Login extends AppCompatActivity {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
+
         txtLogin = findViewById(R.id.txtLogin);
         txtMatKhau = findViewById(R.id.txtMatKhau);
         btLogin = findViewById(R.id.btLogin);
@@ -71,11 +73,6 @@ public class Login extends AppCompatActivity {
         mAuth = FirebaseAuth.getInstance();
         sharedPreferences = getSharedPreferences("MyAppPrefs", MODE_PRIVATE);
 
-        // Nếu người dùng đăng xuất, lưu trạng thái đăng xuất là true
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putBoolean("userLoggedOut", true);
-        editor.apply();
-
         initView();
     }
 
@@ -84,10 +81,9 @@ public class Login extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 progressBar.setVisibility(View.VISIBLE);
-                String login, password;
-                login = String.valueOf(txtLogin.getText().toString().trim());
-                password = String.valueOf(txtMatKhau.getText().toString().trim());
-                if (txtLogin.getText().toString().isEmpty() || txtMatKhau.getText().toString().isEmpty()) {
+                String login = txtLogin.getText().toString().trim();
+                String password = txtMatKhau.getText().toString().trim();
+                if (login.isEmpty() || password.isEmpty()) {
                     progressBar.setVisibility(View.GONE);
                     Toast.makeText(Login.this, "Hãy nhập Tên Tài Khoản và Mật Khẩu!", Toast.LENGTH_SHORT).show();
                     return;
@@ -98,11 +94,7 @@ public class Login extends AppCompatActivity {
                                 public void onComplete(@NonNull Task<AuthResult> task) {
                                     progressBar.setVisibility(View.GONE);
                                     if (task.isSuccessful()) {
-                                        // Cập nhật trạng thái đăng nhập trong SharedPreferences
-                                        SharedPreferences.Editor editor = sharedPreferences.edit();
-                                        editor.putBoolean("userLoggedOut", false);
-                                        editor.apply();
-                                        Toast.makeText(Login.this, "Đăng Nhập Thành công", Toast.LENGTH_SHORT).show();
+                                        Toast.makeText(Login.this, "Đăng Nhập Thành công", Toast.LENGTH_SHORT).show();
                                         String userId = mAuth.getCurrentUser().getUid();
                                         checkUserRoleAndRedirect(userId);
                                     } else {
@@ -117,7 +109,11 @@ public class Login extends AppCompatActivity {
         btDangKy1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                startActivity(new Intent(Login.this, Register.class));
+                if (isUserLoggedIn()) {
+                    Toast.makeText(Login.this, "Bạn cần đăng xuất trước khi đăng ký tài khoản mới.", Toast.LENGTH_SHORT).show();
+                } else {
+                    startActivity(new Intent(Login.this, Register.class));
+                }
             }
         });
 
@@ -125,8 +121,14 @@ public class Login extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 startActivity(new Intent(Login.this, ForgotPassword.class));
+                finish();
             }
         });
+    }
+
+    private boolean isUserLoggedIn() {
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+        return currentUser != null;
     }
 
     private void checkUserRoleAndRedirect(String userId) {
@@ -139,11 +141,12 @@ public class Login extends AppCompatActivity {
                 User user = snapshot.getValue(User.class);
                 if (user != null) {
                     if (user.isRole()) {
-                        // Chuyển sang AdminMainActivity nếu người dùng là admin
                         startActivity(new Intent(Login.this, AdminMainActivity.class));
                     } else {
-                        // Chuyển sang MainActivity nếu người dùng là customer
-                        if (user instanceof Customer) { Customer customer = (Customer) user; saveCustomerInfo(customer); }
+                        if (user instanceof Customer) {
+                            Customer customer = (Customer) user;
+                            saveCustomerInfo(customer);
+                        }
                         startActivity(new Intent(Login.this, MainActivity.class));
                     }
                     finish();
@@ -158,16 +161,15 @@ public class Login extends AppCompatActivity {
             }
         });
     }
+
     private void saveCustomerInfo(Customer customer) {
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putString("userEmail", customer.getEmail());
         editor.putString("userMobile", customer.getPhone());
-        editor.putString("userName", customer.getTen());
+        editor.putString("userName", customer.getName());
         editor.putString("userId", customer.getId());
         editor.putInt("diemTV", customer.getDiemTV());
         editor.putString("rankTV", customer.getRankId());
         editor.apply();
     }
-
 }
-

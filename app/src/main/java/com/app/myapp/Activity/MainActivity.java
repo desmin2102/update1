@@ -308,7 +308,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         Toast.makeText(MainActivity.this, "Lỗi", Toast.LENGTH_SHORT).show();
                     } else {
                         // Hiển thị tên người dùng
-                        String name = customer.getTen();
+                        String name = customer.getName();
+                        Log.d("DEBUG", "Tên người dùng: " + name); // Thêm log để kiểm tra tên
                         if (name == null) {
                             txt_name.setVisibility(View.GONE); // ẩn Tên
                         } else {
