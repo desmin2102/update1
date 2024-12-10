@@ -37,6 +37,12 @@
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
                     app:layout_constraintVertical_bias="1.0"></ImageView>
+
+                <ImageView
+                    android:id="@+id/menu_admin"
+                    android:layout_width="37dp"
+                    android:layout_height="57dp"
+                    app:srcCompat="@drawable/ic_setting" />
             </androidx.constraintlayout.widget.ConstraintLayout>
 
             <androidx.constraintlayout.widget.ConstraintLayout

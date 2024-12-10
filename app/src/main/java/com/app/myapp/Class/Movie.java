@@ -5,7 +5,7 @@ import java.util.Date;
 import java.util.List;
 
 public class Movie {
-    private int id;
+    private String id;
     private String title;
     private String duration;
     private String movieDateStart;
@@ -21,12 +21,11 @@ public class Movie {
         // Constructor mặc định
     }
 
-    public Movie(int id, String title, String duration, String movieDateStart, String movieDateEnd, String genre, String rating, String summary, String trailerUrl, String imageUrl) {
+    public Movie(String id, String title, String duration, String movieDateStart, String genre, String rating, String summary, String trailerUrl, String imageUrl) {
         this.id = id;
         this.title = title;
         this.duration = duration;
         this.movieDateStart = movieDateStart;
-        this.movieDateEnd = movieDateEnd;
         this.genre = genre;
         this.rating = rating;
         this.summary = summary;
@@ -37,11 +36,11 @@ public class Movie {
 
     // Các phương thức getter và setter
 
-    public int getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(String id) {
         this.id = id;
     }
 
@@ -69,13 +68,6 @@ public class Movie {
         this.movieDateStart = movieDateStart;
     }
 
-    public String getMovieDateEnd() {
-        return movieDateEnd;
-    }
-
-    public void setMovieDateEnd(String movieDateEnd) {
-        this.movieDateEnd = movieDateEnd;
-    }
 
     public String getGenre() {
         return genre;

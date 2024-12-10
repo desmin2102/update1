@@ -7,6 +7,8 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Adapter;
 import android.widget.Button;
+import android.widget.ImageButton;
+import android.widget.ImageView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -54,6 +56,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         init();
+        handleMenuIconClick();
     }
 
     // Hàm khởi tạo
@@ -105,6 +108,18 @@ public class MainActivity extends AppCompatActivity {
                 super.onPageSelected(position);
                 handler.removeCallbacks(runnable);
                 handler.postDelayed(runnable, 3000);
+            }
+        });
+    }
+    private void handleMenuIconClick() {
+        ImageView menuIcon = findViewById(R.id.menu_admin);
+// Tìm nút menu
+        menuIcon.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // Chuyển sang AdminMainActivity khi nhấn nút
+                Intent intent = new Intent(MainActivity.this, AdminMainActivity.class);
+                startActivity(intent);
             }
         });
     }
@@ -207,4 +222,6 @@ public class MainActivity extends AppCompatActivity {
         FirebaseDatabase database = FirebaseDatabase.getInstance();
         DatabaseReference myRef = database.getReference();
     } }
+
+
 

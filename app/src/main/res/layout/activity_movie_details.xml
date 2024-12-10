@@ -72,13 +72,7 @@
                 android:textSize="18sp"
                 android:layout_marginLeft="15dp"/>
 
-            <TextView
 
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Ending:"
-                android:textSize="18sp"
-                android:layout_marginLeft="15dp"/>
 
             <TextView
                 android:layout_width="match_parent"
@@ -116,14 +110,6 @@
                 android:textSize="18sp"
                 android:layout_marginLeft="15dp"
                 />
-
-            <TextView
-                android:id="@+id/movie_ending"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text=""
-                android:textSize="18sp"
-                android:layout_marginLeft="15dp"/>
 
             <TextView
                 android:id="@+id/movie_genre"

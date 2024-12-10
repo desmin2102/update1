@@ -26,7 +26,6 @@ public class MovieDetailsActivity extends AppCompatActivity {
     private TextView movieTitleTextView;
     private TextView movieDurationTextView;
     private TextView movieDateStartTextView;
-    private TextView movieDateEndTextView;
     private TextView movieGenreTextView;
     private TextView movieRatingTextView;
     private TextView movieSummaryTextView;
@@ -47,7 +46,6 @@ public class MovieDetailsActivity extends AppCompatActivity {
         movieTitleTextView = findViewById(R.id.movie_title);
         movieDurationTextView = findViewById(R.id.movie_duration);
         movieDateStartTextView = findViewById(R.id.movie_starting);
-        movieDateEndTextView = findViewById(R.id.movie_ending);
         movieGenreTextView = findViewById(R.id.movie_genre);
         movieRatingTextView = findViewById(R.id.movie_rating);
         movieSummaryTextView = findViewById(R.id.movie_summary);
@@ -93,7 +91,6 @@ public class MovieDetailsActivity extends AppCompatActivity {
                 String title = dataSnapshot.child("title").getValue(String.class);
                 String duration = dataSnapshot.child("duration").getValue(String.class);
                 String dateStart = dataSnapshot.child("movieDateStart").getValue(String.class);
-                String dateEnd = dataSnapshot.child("movieDateEnd").getValue(String.class);
                 String genre = dataSnapshot.child("genre").getValue(String.class);
                 String rating=dataSnapshot.child("rating").getValue(String.class);
                 String summary = dataSnapshot.child("summary").getValue(String.class);
@@ -108,9 +105,6 @@ public class MovieDetailsActivity extends AppCompatActivity {
                 }
                 if (dateStart != null) {
                     movieDateStartTextView.setText(dateStart);
-                }
-                if (dateEnd != null) {
-                    movieDateEndTextView.setText(dateEnd);
                 }
                 if (genre != null) {
                     movieGenreTextView.setText(genre);

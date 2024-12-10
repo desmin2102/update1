@@ -69,7 +69,7 @@ public class AdAdapter extends RecyclerView.Adapter<AdAdapter.AdViewHolder> {
                 public void onClick(View v) {
                     Intent intent = new Intent(context, AdDetailsActivity.class);
                     intent.putExtra("imageAdUrl", ad.getMediaurl());
-                    intent.putExtra("adId", String.valueOf(ad.getId())); // Truyền ID quảng cáo dưới dạng chuỗi
+                    intent.putExtra("adId", ad.getId()); // Truyền ID quảng cáo dưới dạng chuỗi
                     context.startActivity(intent);
                 }
             });

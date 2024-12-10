@@ -2,7 +2,7 @@ package com.app.myapp.Class;
 
 
 public class Ad{
-    private int id;
+    private String id;
     private String note;
     private String mediaurl;
 
@@ -10,17 +10,17 @@ public class Ad{
     {
 
     }
-    public Ad(int id, String note, String mediaurl) {
+    public Ad(String id, String note, String mediaurl) {
         this.id = id;
         this.note = note;
         this.mediaurl = mediaurl;
     }
 
-    public int getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(String id) {
         this.id = id;
     }
 
