@@ -44,18 +44,21 @@ dependencies {
     implementation(libs.gson)
     implementation(libs.retrofit)
     implementation(libs.glide)
-    implementation(libs.firebase.database)
-    implementation(libs.firebase.firestore)
-    implementation(libs.firebase.storage)
-    implementation(libs.firebase.functions)
-
     implementation (libs.picasso)
+
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
 
+    implementation (libs.drawerlayout)
+    implementation(libs.firebase.database)
+    implementation(libs.firebase.firestore)
+    implementation(libs.firebase.storage)
+    implementation(libs.firebase.functions)
     implementation(libs.firebase.auth)
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.analytics)
+
+
 }

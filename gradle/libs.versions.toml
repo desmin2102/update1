@@ -1,4 +1,5 @@
 [versions]
+drawerlayout = "1.2.0"
 googleGmsGoogleServices = "4.4.2"
 agp = "8.7.2"
 firebaseAuth = "23.1.0"
@@ -23,6 +24,7 @@ firebaseStorage = "21.0.1"
 firebaseFunctions = "21.0.0"
 
 [libraries]
+drawerlayout = { module = "androidx.drawerlayout:drawerlayout", version.ref = "drawerlayout" }
 firebase-analytics = { module = "com.google.firebase:firebase-analytics" }
 firebase-auth = { module = "com.google.firebase:firebase-auth", version.ref = "firebaseAuth" }
 firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBom" }
