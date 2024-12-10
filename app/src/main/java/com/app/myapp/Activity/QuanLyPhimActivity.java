@@ -3,6 +3,7 @@ package com.app.myapp.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.widget.ArrayAdapter;
@@ -22,6 +23,7 @@ import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class QuanLyPhimActivity extends AppCompatActivity {
 
@@ -67,7 +69,7 @@ public class QuanLyPhimActivity extends AppCompatActivity {
         fetchMovieData();
 
         // Khởi tạo Handler để tạo độ trễ
-        handler = new Handler();
+        handler = new Handler(Objects.requireNonNull(Looper.myLooper()));
 
         // Thêm sự kiện TextWatcher cho EditText
         etSearch.addTextChangedListener(new TextWatcher() {

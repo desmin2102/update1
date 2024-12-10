@@ -29,6 +29,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import android.content.SharedPreferences;
 
 public class Login extends AppCompatActivity {
     private FirebaseAuth mAuth;
@@ -36,13 +37,15 @@ public class Login extends AppCompatActivity {
     private TextView txtQuenMK;
     private Button btLogin, btDangKy1;
     private ProgressBar progressBar;
+    private SharedPreferences sharedPreferences;
 
     @Override
     public void onStart() {
         super.onStart();
         mAuth = FirebaseAuth.getInstance();
         FirebaseUser currentUser = mAuth.getCurrentUser();
-        if(currentUser != null){
+        boolean userLoggedOut = sharedPreferences.getBoolean("userLoggedOut", true);
+        if (currentUser != null && !userLoggedOut) {
             checkUserRoleAndRedirect(currentUser.getUid());
         }
     }
@@ -65,6 +68,12 @@ public class Login extends AppCompatActivity {
         progressBar = findViewById(R.id.progressBar);
 
         mAuth = FirebaseAuth.getInstance();
+        sharedPreferences = getSharedPreferences("MyAppPrefs", MODE_PRIVATE);
+
+        // Nếu người dùng đăng xuất, lưu trạng thái đăng xuất là true
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putBoolean("userLoggedOut", true);
+        editor.apply();
 
         initView();
     }
@@ -88,6 +97,11 @@ public class Login extends AppCompatActivity {
                                 public void onComplete(@NonNull Task<AuthResult> task) {
                                     progressBar.setVisibility(View.GONE);
                                     if (task.isSuccessful()) {
+                                        // Cập nhật trạng thái đăng nhập trong SharedPreferences
+                                        SharedPreferences.Editor editor = sharedPreferences.edit();
+                                        editor.putBoolean("userLoggedOut", false);
+                                        editor.apply();
+                                        Toast.makeText(Login.this, "Đăng Nhập Thành công", Toast.LENGTH_SHORT).show();
                                         String userId = mAuth.getCurrentUser().getUid();
                                         checkUserRoleAndRedirect(userId);
                                     } else {
@@ -145,3 +159,4 @@ public class Login extends AppCompatActivity {
         });
     }
 }
+
