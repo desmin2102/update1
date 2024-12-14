@@ -17,6 +17,7 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import com.app.myapp.Class.Customer;
 import com.app.myapp.Class.User;
 import com.app.myapp.R;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -142,6 +143,7 @@ public class Login extends AppCompatActivity {
                         startActivity(new Intent(Login.this, AdminMainActivity.class));
                     } else {
                         // Chuyển sang MainActivity nếu người dùng là customer
+                        if (user instanceof Customer) { Customer customer = (Customer) user; saveCustomerInfo(customer); }
                         startActivity(new Intent(Login.this, MainActivity.class));
                     }
                     finish();
@@ -156,5 +158,16 @@ public class Login extends AppCompatActivity {
             }
         });
     }
+    private void saveCustomerInfo(Customer customer) {
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putString("userEmail", customer.getEmail());
+        editor.putString("userMobile", customer.getPhone());
+        editor.putString("userName", customer.getTen());
+        editor.putString("userId", customer.getId());
+        editor.putInt("diemTV", customer.getDiemTV());
+        editor.putString("rankTV", customer.getRankId());
+        editor.apply();
+    }
+
 }
 

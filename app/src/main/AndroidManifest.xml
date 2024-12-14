@@ -3,6 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
 
     <application
         android:allowBackup="true"
@@ -14,6 +15,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.MyApp"
         tools:targetApi="31">
+
         <activity
             android:name=".Activity.VeCuaToi"
             android:exported="false" />
@@ -22,41 +24,53 @@
             android:exported="false" />
         <activity
             android:name=".Activity.ChinhSach"
-            android:exported="false" /> <!-- Cac activity -->
-        <!-- Admin -->
-        <activity
-            android:name=".Activity.AdminMainActivity"
             android:exported="false" />
-        <activity
-            android:name=".Activity.QuanLyBacThanhVienActivity"
-            android:exported="false" />
-        <activity
-            android:name=".Activity.QuanLyNguoiDungActivity"
-            android:exported="false" />
-        <activity
-            android:name=".Activity.QuanLyPhimActivity"
-            android:exported="false" />
-        <activity
-            android:name=".Activity.QuanLyPhimDetailActivity"
-            android:exported="false" />
-        <activity
-            android:name=".Activity.QuanLyPhongActivity"
-            android:exported="false" />
+        <!--Cac activity-->
+        <!--Admin-->
+<!--        <activity-->
+<!--            android:name=".Activity.AdminMainActivity"-->
+<!--            android:exported="false" />-->
+
+<!--        <activity-->
+<!--            android:name=".Activity.QuanLyBacThanhVienActivity"-->
+<!--            android:exported="false" />-->
+
+<!--        <activity-->
+<!--            android:name=".Activity.QuanLyNguoiDungActivity"-->
+<!--            android:exported="false" />-->
+
+<!--        <activity-->
+<!--            android:name=".Activity.QuanLyPhimActivity"-->
+<!--            android:exported="false" />-->
+
+<!--        <activity-->
+<!--            android:name=".Activity.QuanLyPhimDetailActivity"-->
+<!--            android:exported="false" />-->
+
+<!--        <activity-->
+<!--            android:name=".Activity.QuanLyPhongActivity"-->
+<!--            android:exported="false" />-->
+
         <activity
             android:name=".Activity.QuanLyQuangCaoActivity"
             android:exported="false" />
+
         <activity
             android:name=".Activity.QuanLyQuangCaoDetailActivity"
             android:exported="false" />
+
         <activity
             android:name=".Activity.QuanLyRapActivity"
             android:exported="false" />
+
         <activity
             android:name=".Activity.QuanLySuatActivity"
             android:exported="false" />
+
         <activity
             android:name=".Activity.ThongKeActivity"
-            android:exported="false" /> <!-- Admin -->
+            android:exported="false" />
+
         <activity
             android:name=".Activity.ForgotPassword"
             android:exported="false" />
@@ -69,17 +83,29 @@
         <activity
             android:name=".Activity.MainActivity"
             android:exported="false" />
-        <activity android:name=".Activity.LocationActivity" />
+        <activity android:name=".Activity.PaymentActivity"
+            android:exported="true"
+            android:label="Merchant Demo"
+            android:launchMode="singleTask">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data android:scheme="demozpdk" android:host="app"/>
+            </intent-filter>
+        </activity>
+
+        <activity android:name=".Activity.SeatSelectionActivity"/>
         <activity android:name=".Activity.AdDetailsActivity" />
         <activity android:name=".Activity.MovieDetailsActivity" />
-        <activity android:name=".Activity.ScheduleActivity" />
+        <activity android:name=".Activity.ScheduleActivity"/>
         <activity
             android:name=".Activity.Login"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
+
             </intent-filter>
         </activity>
     </application>

@@ -1,25 +1,19 @@
 package com.app.myapp.Class;
 
 public class Customer extends User {
-    private String idTV;
     private int diemTV;
-    private String rankTV;
+    private String rankId;
 
-    public Customer(String userId, String ten, String email, String phone, String password, Boolean role, String idTV, int diemTV, String rankTV) {
+    public Customer()
+    {
+
+    }
+    public Customer(String userId, String ten, String email, String phone, String password, Boolean role, int diemTV, String rankId) {
         super(userId, ten, email, phone, password, role); // Truyền tham số role vào constructor của lớp User
-        this.idTV = idTV;
         this.diemTV = diemTV;
-        this.rankTV = rankTV;
-    }
+        this.rankId = determineRankId(diemTV); // Cập nhật rankId khi điểm thay đổi
+         }
 
-    // Các phương thức getter và setter
-    public String getIdTV() {
-        return idTV;
-    }
-
-    public void setIdTV(String idTV) {
-        this.idTV = idTV;
-    }
 
     public int getDiemTV() {
         return diemTV;
@@ -27,13 +21,26 @@ public class Customer extends User {
 
     public void setDiemTV(int diemTV) {
         this.diemTV = diemTV;
+        this.rankId = determineRankId(diemTV);
     }
 
-    public String getRankTV() {
-        return rankTV;
+    public String getRankId() {
+        return rankId;
     }
 
-    public void setRankTV(String rankTV) {
-        this.rankTV = rankTV;
+    private String determineRankId(int diemTV) {
+        if (diemTV >= 4000) {
+            return "5";
+        } else if (diemTV >= 3000) {
+            return "4";
+        } else if (diemTV >= 2000) {
+            return "3";
+        } else if (diemTV >= 1000) {
+            return "2";
+        } else {
+            return "1";
+        }
     }
 }
+
+

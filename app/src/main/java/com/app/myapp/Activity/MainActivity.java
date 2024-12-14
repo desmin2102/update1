@@ -28,7 +28,9 @@ import androidx.viewpager2.widget.ViewPager2;
 import com.app.myapp.Adapter.AdAdapter;
 import com.app.myapp.Adapter.MovieAdapter;
 import com.app.myapp.Class.Ad;
+import com.app.myapp.Class.Customer;
 import com.app.myapp.Class.Movie;
+import com.app.myapp.Class.Rank;
 import com.app.myapp.Class.User;
 import com.app.myapp.R;
 import com.bumptech.glide.Glide;
@@ -58,6 +60,8 @@ import me.relex.circleindicator.CircleIndicator3;
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
     public static final int MY_REQUEST_CODE = 10;
 
+    private static final int Fragment_ChangePassWord = 4;
+
     private int mCurrentFragment = 0;
 
     private FirebaseAuth mAuth;
@@ -72,7 +76,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private MovieAdapter mvAdapter;
 
     private List<Ad> listAd = new ArrayList<>();
-    private List<Movie> listMovie = new ArrayList<>();
+    private List<Movie> listMovie=new ArrayList<>();
 
     private DrawerLayout drawerLayout;
     private BottomNavigationView bottomNavigationView;
@@ -106,7 +110,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         FirebaseApp.initializeApp(this);
 
         init();
-        showUserInfomation();
     }
 
     // Hàm khởi tạo
@@ -116,34 +119,30 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         //Khởi tạo View Movie
         initializeViewsMovie();
         // Khởi tạo nút Booking
-        initializeBookingButton();
-        //khởi tạo nav_view,menu
         initializeViewsMenu();
+        initializeBookingButton();
         // Cài đặt ảnh chạy tự động
         setupAutoSlideImages();
         // Thiết lập ViewPager
         setupViewPagerAd();
         // Lấy dữ liệu từ Firebase
         setupViewPagerMovie();
+        showUserInfomation();
         fetchAdsFromDatabase();
         fetchMoviesFromDatabase();
         saveData();
         // Cập nhật ảnh nền khi khởi tạo ứng dụng
         if (!listMovie.isEmpty()) {
             String initialImageUrl = listMovie.get(0).getImageUrl();
-            updateBackgroundImage(initialImageUrl);
-        }
+            updateBackgroundImage(initialImageUrl); }
         // Đăng ký lắng nghe sự kiện thay đổi trang trong ViewPager2
         viewPagermv.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
-            @Override
-            public void onPageSelected(int position) {
+            @Override public void onPageSelected(int position) {
                 super.onPageSelected(position);
                 // Lấy URL ảnh của bộ phim hiện tại
                 String imageUrl = listMovie.get(position).getImageUrl();
                 // Cập nhật nền ứng dụng
-                updateBackgroundImage(imageUrl);
-            }
-        });
+                updateBackgroundImage(imageUrl); } });
     }
 
     private void initializeViewsMenu() {
@@ -153,19 +152,16 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         txt_name = navigationView.getHeaderView(0).findViewById(R.id.txt_name);
         txt_email = navigationView.getHeaderView(0).findViewById(R.id.txt_email);
     }
-
     private void updateBackgroundImage(String imageUrl) {
         RequestOptions requestOptions = new RequestOptions()
                 .transform(new BlurTransformation(25, 3));
         // Điều chỉnh độ mờ
-        Glide.with(this).load(imageUrl).apply(requestOptions).into(backgroundImageView);
-    }
+        Glide.with(this) .load(imageUrl) .apply(requestOptions) .into(backgroundImageView); }
 
     private void initializeViewsAd() {
         viewPagerqc = findViewById(R.id.viewPager_quangcao);
         circleIndicator = findViewById(R.id.circleIndicator);
     }
-
     private void initializeViewsMovie() {
         viewPagermv = findViewById(R.id.viewPager_movie);
     }
@@ -181,7 +177,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     Movie currentMovie = listMovie.get(viewPagermv.getCurrentItem());
 
                     // Mở LocationActivity khi nhấn nút Booking
-                    Intent intent = new Intent(MainActivity.this, LocationActivity.class);
+                    Intent intent = new Intent(MainActivity.this, ScheduleActivity.class);
                     intent.putExtra("movieId", currentMovie.getId()); // Truyền ID của bộ phim
                     startActivity(intent);
                 } else {
@@ -191,6 +187,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
         });
     }
+
+
+
 
     private void setupAutoSlideImages() {
         runnable = new Runnable() {
@@ -282,50 +281,74 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     private void showUserInfomation() {
-
-
-
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         if (user == null) {
             return;
         }
-
         mAuth = FirebaseAuth.getInstance();
         FirebaseUser currentUser = mAuth.getCurrentUser();
         String userId = currentUser.getUid();
-       //Toast.makeText(this, "User ID: " + userId, Toast.LENGTH_LONG).show();
+
+        // Lấy các TextView từ nav_header
+        NavigationView navigationView = findViewById(R.id.nav_view);
+        View headerView = navigationView.getHeaderView(0);
+        TextView txt_name = headerView.findViewById(R.id.txt_name);
+        TextView txt_email = headerView.findViewById(R.id.txt_email);
+        TextView txtDiemRank = headerView.findViewById(R.id.txtDiemRank);
+        TextView rankhientai = headerView.findViewById(R.id.rankhientai);
+
+        // Lấy thông tin người dùng từ Firebase
         DatabaseReference userRef = FirebaseDatabase.getInstance().getReference("User").child(userId);
-
-
-
         userRef.get().addOnCompleteListener(new OnCompleteListener<DataSnapshot>() {
             @Override
             public void onComplete(@NonNull Task<DataSnapshot> task) {
                 if (task.isSuccessful()) {
-                    User user1 = task.getResult().getValue(User.class);
-                    if(user1==null){
+                    Customer customer = task.getResult().getValue(Customer.class);
+                    if (customer == null) {
                         Toast.makeText(MainActivity.this, "Lỗi", Toast.LENGTH_SHORT).show();
-                    }else {
-                        String name = user1.getTen();
-                        //Toast.makeText(MainActivity.this, "User ID: " + name, Toast.LENGTH_LONG).show();
+                    } else {
+                        // Hiển thị tên người dùng
+                        String name = customer.getTen();
                         if (name == null) {
-                            txt_name.setVisibility(View.GONE);//ẩn Tên
-
+                            txt_name.setVisibility(View.GONE); // ẩn Tên
                         } else {
                             txt_name.setVisibility(View.VISIBLE);
                             txt_name.setText(name);
                         }
+
+                        // Hiển thị email người dùng
                         String email = user.getEmail();
                         txt_email.setText(email);
+
+                        // Hiển thị điểm số người dùng
+                        txtDiemRank.setText(String.valueOf(customer.getDiemTV()));
+
+                        // Lấy Rank từ Firebase dựa trên rankId
+                        DatabaseReference rankRef = FirebaseDatabase.getInstance().getReference("Rank").child(customer.getRankId());
+                        rankRef.get().addOnCompleteListener(new OnCompleteListener<DataSnapshot>() {
+                            @Override
+                            public void onComplete(@NonNull Task<DataSnapshot> rankTask) {
+                                if (rankTask.isSuccessful()) {
+                                    Rank rank = rankTask.getResult().getValue(Rank.class);
+                                    if (rank != null) {
+                                        // Hiển thị tên rank
+                                        rankhientai.setText(rank.getName());
+                                    } else {
+                                        rankhientai.setText("Unknown");
+                                    }
+                                } else {
+                                    Toast.makeText(MainActivity.this, "Lỗi: Không tìm thấy thông tin rank", Toast.LENGTH_SHORT).show();
+                                }
+                            }
+                        });
                     }
-                }
-                else {
-                    Toast.makeText(MainActivity.this, "Lỗi: Không tìm thấy thông tin người dùng",
-                            Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(MainActivity.this, "Lỗi: Không tìm thấy thông tin người dùng", Toast.LENGTH_SHORT).show();
                 }
             }
         });
     }
+
 
     @Override
     protected void onDestroy() {
@@ -353,19 +376,19 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         if (id == R.id.nav_history) {
             startActivity(new Intent(MainActivity.this,PhimDaXem.class));
         }else
-            if (id == R.id.nav_ticket) {
-                startActivity(new Intent(MainActivity.this,VeCuaToi.class));
+        if (id == R.id.nav_ticket) {
+            startActivity(new Intent(MainActivity.this,VeCuaToi.class));
         }else
-            if (id == R.id.nav_changeTT) {
+        if (id == R.id.nav_changeTT) {
             startActivity(new Intent(MainActivity.this,ChangePassword.class));
         }else
-            if (id == R.id.nav_point) {
+        if (id == R.id.nav_point) {
             startActivity(new Intent(MainActivity.this, ChinhSach.class));
         }else
-            if (id == R.id.nav_change) {
+        if (id == R.id.nav_change) {
             startActivity(new Intent(MainActivity.this,ChangePassword.class));
         } else
-            if(id == R.id.nav_logout) {
+        if(id == R.id.nav_logout) {
             FirebaseAuth.getInstance().signOut();
             startActivity(new Intent(this, Login.class));
             finish();
@@ -374,26 +397,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         return true;
     }
 
-
-//    private void addMovieToDatabase(String title, String duration, String movieDateStart, String genre, String rating, String summary, String trailerUrl, String imageUrl) {
-//        // Tạo UUID cho bộ phim mới
-//        String movieId = UUID.randomUUID().toString();
-//
-//        // Tạo đối tượng Movie mới
-//        Movie movie = new Movie(movieId, "VENOM: THE LAST DANCE", "60min", "movieDateStart", "genre", "rating", "summary", "trailerUrl", "imageUrl");
-//
-//        // Lưu Movie mới vào Firebase
-//        DatabaseReference databaseReferenceMovie = FirebaseDatabase.getInstance().getReference("Movie");
-//        databaseReferenceMovie.child(movieId).setValue(movie)
-//                .addOnSuccessListener(aVoid -> {
-//                    // Thành công
-//                    Toast.makeText(getApplicationContext(), "Movie added successfully!", Toast.LENGTH_SHORT).show();
-//                })
-//                .addOnFailureListener(e -> {
-//                    // Thất bại
-//                    Toast.makeText(getApplicationContext(), "Failed to add movie.", Toast.LENGTH_SHORT).show();
-//                });
-//    }
 
 
 }

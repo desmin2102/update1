@@ -1,3 +1,5 @@
+import java.util.regex.Pattern.compile
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.google.gms.google.services)
@@ -49,11 +51,19 @@ dependencies {
     implementation(libs.glide)
     implementation (libs.picasso)
     implementation (libs.glide.transformations)
-
+    implementation (libs.gson)
+    implementation (libs.logging.interceptor)
+    implementation(fileTree(mapOf(
+        "dir" to "D:\\update1\\",
+        "include" to listOf("*.aar", "*.jar"),
+        "exclude" to listOf("")
+    )))
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
+    implementation(libs.okhttp.v460)
+    implementation(libs.commons.codec)
 
     implementation (libs.drawerlayout)
     implementation(libs.firebase.database)

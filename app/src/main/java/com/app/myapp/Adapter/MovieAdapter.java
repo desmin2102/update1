@@ -61,7 +61,6 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
             this.imageViewmv = itemView.findViewById(R.id.movie_item_image);
         }
 
-        @SuppressWarnings("unchecked")
         void setImage(final Movie movie) {
             RequestOptions requestOptions = new RequestOptions();
             requestOptions = requestOptions.transform(new CenterCrop(), new RoundedCorners(60));

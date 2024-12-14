@@ -1,60 +1,158 @@
 package com.app.myapp.Activity;
 
 import android.os.Bundle;
+import android.util.Log;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import androidx.viewpager2.widget.CompositePageTransformer;
-import androidx.viewpager2.widget.MarginPageTransformer;
-import androidx.viewpager2.widget.ViewPager2;
 
 import android.view.View;
-import android.widget.ImageView;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.Spinner;
+import android.widget.TextView;
+import android.view.MenuItem;
+
 import com.app.myapp.Adapter.DayAdapter;
+import com.app.myapp.Class.Movie;
 import com.app.myapp.R;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
 public class ScheduleActivity extends AppCompatActivity {
 
-    private ViewPager2 viewPager;
+    private RecyclerView recyclerView;
+    private RecyclerView movieSessionRecyclerView;
     private DayAdapter dayAdapter;
     private List<Calendar> dayList;
-    private ImageView swipeHintImageView;
+    private TextView movieTitleTextView;
+    private Toolbar toolbar;
+    private Spinner spinnerLocation;
+    private String selectedLocationId;
+    private String movieId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_schedule);
 
-        viewPager = findViewById(R.id.viewPager);
-        swipeHintImageView = findViewById(R.id.swipeHintImageView);
+        toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        }
+
+        recyclerView = findViewById(R.id.recyclerView);
+        movieSessionRecyclerView = findViewById(R.id.movieSessionRecyclerView);
+        movieTitleTextView = findViewById(R.id.movieTitleTextView);
+        spinnerLocation = findViewById(R.id.spinnerLocation);
+
+        // Thiết lập LayoutManager cho RecyclerView để hiển thị ngày
+        LinearLayoutManager layoutManager = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
+        recyclerView.setLayoutManager(layoutManager);
+
+        // Thiết lập GridLayoutManager cho movieSessionRecyclerView
+        GridLayoutManager gridLayoutManager = new GridLayoutManager(this, 3);
+        movieSessionRecyclerView.setLayoutManager(gridLayoutManager);
 
         // Khởi tạo danh sách ngày
         dayList = generateDays();
 
-        dayAdapter = new DayAdapter(dayList);
-        viewPager.setAdapter(dayAdapter);
+        // Nhận dữ liệu từ Intent
+        movieId = getIntent().getStringExtra("movieId");
 
-        // Thêm hiệu ứng PageTransformer
-        CompositePageTransformer compositePageTransformer = new CompositePageTransformer();
-        compositePageTransformer.addTransformer(new MarginPageTransformer(20));
-        compositePageTransformer.addTransformer((page, position) -> {
-            float r = 1 - Math.abs(position);
-            page.setScaleY(0.8f + r * 0.2f);
-        });
-        viewPager.setPageTransformer(compositePageTransformer);
-
-        // Ẩn biểu tượng mũi tên sau khi người dùng vuốt qua
-        viewPager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
-            @Override
-            public void onPageSelected(int position) {
-                super.onPageSelected(position);
-                if (position > 0) {
-                    swipeHintImageView.setVisibility(View.GONE);
+        // Truy xuất tên phim từ movieId
+        if (movieId != null && !movieId.isEmpty()) {
+            DatabaseReference movieRef = FirebaseDatabase.getInstance().getReference("Movie").child(movieId);
+            movieRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    Movie movie = dataSnapshot.getValue(Movie.class);
+                    if (movie != null) {
+                        movieTitleTextView.setText(movie.getTitle());
+                    }
                 }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+                    // Xử lý lỗi nếu cần
+                }
+            });
+        } else {
+            Log.e("ScheduleActivity", "movieId is null or empty");
+        }
+
+        // Truy xuất danh sách Location từ Firebase và thiết lập Spinner
+        DatabaseReference locationRef = FirebaseDatabase.getInstance().getReference("Location");
+        locationRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                List<String> locationAddressList = new ArrayList<>();
+                final List<String> locationIds = new ArrayList<>();
+                for (DataSnapshot locationSnapshot : dataSnapshot.getChildren()) {
+                    String locationAddress = locationSnapshot.child("address").getValue(String.class);
+                    String locationId = locationSnapshot.getKey();
+                    if (locationAddress != null && locationId != null) {
+                        locationAddressList.add(locationAddress);
+                        locationIds.add(locationId);
+                    }
+                }
+                ArrayAdapter<String> adapter = new ArrayAdapter<>(ScheduleActivity.this, android.R.layout.simple_spinner_item, locationAddressList);
+                adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                spinnerLocation.setAdapter(adapter);
+
+                // Đặt Location mặc định là Location đầu tiên
+                if (!locationIds.isEmpty()) {
+                    spinnerLocation.setSelection(0);
+                    selectedLocationId = locationIds.get(0);
+                }
+
+                // Lắng nghe sự kiện thay đổi lựa chọn
+                spinnerLocation.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                    @Override
+                    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                        selectedLocationId = locationIds.get(position);
+                        // Cập nhật lại DayAdapter với locationId mới
+                        updateDayAdapter(movieId, selectedLocationId);
+                    }
+
+                    @Override
+                    public void onNothingSelected(AdapterView<?> parent) {
+                        // Xử lý nếu không có lựa chọn nào được chọn
+                    }
+                });
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                // Xử lý lỗi nếu cần
             }
         });
+    }
+
+    private void updateDayAdapter(String movieId, String locationId) {
+        // Truyền movieId và locationId vào DayAdapter và mặc định chọn ngày đầu tiên
+        dayAdapter = new DayAdapter(dayList, this, movieSessionRecyclerView, movieId, locationId);
+        recyclerView.setAdapter(dayAdapter);
+        dayAdapter.selectFirstDay(); // Thêm dòng này để mặc định chọn ngày đầu tiên
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == android.R.id.home) {
+            finish(); // Quay lại trang trước đó
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     private List<Calendar> generateDays() {

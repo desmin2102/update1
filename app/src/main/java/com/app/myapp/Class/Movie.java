@@ -1,5 +1,7 @@
 package com.app.myapp.Class;
 
+import java.util.List;
+
 public class Movie {
     private String id;
     private String title;
@@ -32,7 +34,7 @@ public class Movie {
         return id;
     }
 
-    public void setId(String id) {
+    public void setMovieId(String id) {
         this.id = id;
     }
 
@@ -99,4 +101,6 @@ public class Movie {
     public void setImageUrl(String imageUrl) {
         this.imageUrl = imageUrl;
     }
+
+
 }
