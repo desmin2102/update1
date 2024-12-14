@@ -2,6 +2,7 @@ package com.app.myapp.Class;
 
 public class User {
     private String id;
+    private String ten;
     private String email;
     private String phone;
     private String password;
@@ -11,8 +12,9 @@ public class User {
         // Constructor mặc định
     }
 
-    public User(String id, String email, String phone, String password, boolean role) {
+    public User(String id,String ten, String email, String phone, String password, boolean role) {
         this.id = id;
+        this.ten = ten;
         this.email = email;
         this.phone = phone;
         this.password = password;
@@ -27,6 +29,10 @@ public class User {
     public void setId(String id) {
         this.id = id;
     }
+
+    public String getTen() { return ten; }
+
+    public void setTen(String ten) { this.ten = ten; }
 
     public String getEmail() {
         return email;

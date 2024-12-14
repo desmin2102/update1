@@ -117,7 +117,6 @@ public class Login extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 startActivity(new Intent(Login.this, Register.class));
-                finish();
             }
         });
 
@@ -125,7 +124,6 @@ public class Login extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 startActivity(new Intent(Login.this, ForgotPassword.class));
-                finish();
             }
         });
     }

@@ -9,6 +9,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.widget.Toolbar;
@@ -28,13 +29,17 @@ import com.app.myapp.Adapter.AdAdapter;
 import com.app.myapp.Adapter.MovieAdapter;
 import com.app.myapp.Class.Ad;
 import com.app.myapp.Class.Movie;
+import com.app.myapp.Class.User;
 import com.app.myapp.R;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -53,15 +58,9 @@ import me.relex.circleindicator.CircleIndicator3;
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
     public static final int MY_REQUEST_CODE = 10;
 
-    private static final int Fragment_PhimDaXem = 0;
-    private static final int Fragment_VecuaTui = 1;
-    private static final int Fragment_ThongTinThanhVien = 2;
-    private static final int Fragment_ChinhSachTichDiem = 3;
-    private static final int Fragment_ChangePassWord = 4;
-
     private int mCurrentFragment = 0;
 
-
+    private FirebaseAuth mAuth;
     private ViewPager2 viewPagerqc;
     private ViewPager2 viewPagermv;
 
@@ -73,13 +72,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private MovieAdapter mvAdapter;
 
     private List<Ad> listAd = new ArrayList<>();
-    private List<Movie> listMovie=new ArrayList<>();
+    private List<Movie> listMovie = new ArrayList<>();
 
     private DrawerLayout drawerLayout;
     private BottomNavigationView bottomNavigationView;
 
     private Button buttonBooking;
     private ImageView backgroundImageView;
+    private TextView txt_name, txt_email;
+    private NavigationView navigationView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -99,12 +100,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         });
 
         backgroundImageView = findViewById(R.id.backgroundImageView);
-        NavigationView navigationView = findViewById(R.id.nav_view);
+        navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
         FirebaseApp.initializeApp(this);
 
         init();
+        showUserInfomation();
     }
 
     // Hàm khởi tạo
@@ -115,6 +117,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         initializeViewsMovie();
         // Khởi tạo nút Booking
         initializeBookingButton();
+        //khởi tạo nav_view,menu
+        initializeViewsMenu();
         // Cài đặt ảnh chạy tự động
         setupAutoSlideImages();
         // Thiết lập ViewPager
@@ -122,32 +126,46 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         // Lấy dữ liệu từ Firebase
         setupViewPagerMovie();
         fetchAdsFromDatabase();
-                fetchMoviesFromDatabase();
+        fetchMoviesFromDatabase();
         saveData();
         // Cập nhật ảnh nền khi khởi tạo ứng dụng
         if (!listMovie.isEmpty()) {
             String initialImageUrl = listMovie.get(0).getImageUrl();
-            updateBackgroundImage(initialImageUrl); }
+            updateBackgroundImage(initialImageUrl);
+        }
         // Đăng ký lắng nghe sự kiện thay đổi trang trong ViewPager2
         viewPagermv.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
-            @Override public void onPageSelected(int position) {
+            @Override
+            public void onPageSelected(int position) {
                 super.onPageSelected(position);
                 // Lấy URL ảnh của bộ phim hiện tại
                 String imageUrl = listMovie.get(position).getImageUrl();
                 // Cập nhật nền ứng dụng
-                updateBackgroundImage(imageUrl); } });
+                updateBackgroundImage(imageUrl);
+            }
+        });
+    }
+
+    private void initializeViewsMenu() {
+        bottomNavigationView = findViewById(R.id.bottomNavigationView);
+        //txt_name = findViewById(R.id.txt_name);
+        //nếu k chạy đc thi đổi qua
+        txt_name = navigationView.getHeaderView(0).findViewById(R.id.txt_name);
+        txt_email = navigationView.getHeaderView(0).findViewById(R.id.txt_email);
     }
 
     private void updateBackgroundImage(String imageUrl) {
         RequestOptions requestOptions = new RequestOptions()
                 .transform(new BlurTransformation(25, 3));
         // Điều chỉnh độ mờ
-       Glide.with(this) .load(imageUrl) .apply(requestOptions) .into(backgroundImageView); }
+        Glide.with(this).load(imageUrl).apply(requestOptions).into(backgroundImageView);
+    }
 
     private void initializeViewsAd() {
         viewPagerqc = findViewById(R.id.viewPager_quangcao);
         circleIndicator = findViewById(R.id.circleIndicator);
     }
+
     private void initializeViewsMovie() {
         viewPagermv = findViewById(R.id.viewPager_movie);
     }
@@ -173,9 +191,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
         });
     }
-
-
-
 
     private void setupAutoSlideImages() {
         runnable = new Runnable() {
@@ -266,8 +281,51 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         });
     }
 
+    private void showUserInfomation() {
 
 
+
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if (user == null) {
+            return;
+        }
+
+        mAuth = FirebaseAuth.getInstance();
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+        String userId = currentUser.getUid();
+       //Toast.makeText(this, "User ID: " + userId, Toast.LENGTH_LONG).show();
+        DatabaseReference userRef = FirebaseDatabase.getInstance().getReference("User").child(userId);
+
+
+
+        userRef.get().addOnCompleteListener(new OnCompleteListener<DataSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DataSnapshot> task) {
+                if (task.isSuccessful()) {
+                    User user1 = task.getResult().getValue(User.class);
+                    if(user1==null){
+                        Toast.makeText(MainActivity.this, "Lỗi", Toast.LENGTH_SHORT).show();
+                    }else {
+                        String name = user1.getTen();
+                        //Toast.makeText(MainActivity.this, "User ID: " + name, Toast.LENGTH_LONG).show();
+                        if (name == null) {
+                            txt_name.setVisibility(View.GONE);//ẩn Tên
+
+                        } else {
+                            txt_name.setVisibility(View.VISIBLE);
+                            txt_name.setText(name);
+                        }
+                        String email = user.getEmail();
+                        txt_email.setText(email);
+                    }
+                }
+                else {
+                    Toast.makeText(MainActivity.this, "Lỗi: Không tìm thấy thông tin người dùng",
+                            Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+    }
 
     @Override
     protected void onDestroy() {
@@ -292,12 +350,22 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         // Xử lý các mục trong NavigationView tại đây
         int id = item.getItemId();
-        if (id == R.id.nav_change) {
-            if (mCurrentFragment != Fragment_ChangePassWord) {
-                //replaceFragment(new ChangePassword());
-                mCurrentFragment = Fragment_ChangePassWord;
-            }
-        } else if (id == R.id.nav_logout) {
+        if (id == R.id.nav_history) {
+            startActivity(new Intent(MainActivity.this,PhimDaXem.class));
+        }else
+            if (id == R.id.nav_ticket) {
+                startActivity(new Intent(MainActivity.this,VeCuaToi.class));
+        }else
+            if (id == R.id.nav_changeTT) {
+            startActivity(new Intent(MainActivity.this,ChangePassword.class));
+        }else
+            if (id == R.id.nav_point) {
+            startActivity(new Intent(MainActivity.this, ChinhSach.class));
+        }else
+            if (id == R.id.nav_change) {
+            startActivity(new Intent(MainActivity.this,ChangePassword.class));
+        } else
+            if(id == R.id.nav_logout) {
             FirebaseAuth.getInstance().signOut();
             startActivity(new Intent(this, Login.class));
             finish();

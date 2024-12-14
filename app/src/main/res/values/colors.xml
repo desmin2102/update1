@@ -6,4 +6,6 @@
     <color name="Pink">#FB9590</color>
     <color name="lightorange">#F6BCBA</color>
     <color name="transparent">#00000000</color>
+    <color name="back_backgroup">#1B0E0D</color>
+    <color name="dark_purple">#6750A4</color>
 </resources>

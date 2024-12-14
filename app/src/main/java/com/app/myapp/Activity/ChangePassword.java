@@ -5,6 +5,7 @@ import android.support.annotation.NonNull;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
@@ -35,6 +36,10 @@ public class ChangePassword extends AppCompatActivity {
             return insets;
         });
 
+        // Nút quay lại
+        ImageView imBack = findViewById(R.id.imBack_change);
+        imBack.setOnClickListener(v -> finish());
+
         initUI();
 
         btnDongY.setOnClickListener(new View.OnClickListener() {
@@ -60,6 +65,7 @@ public class ChangePassword extends AppCompatActivity {
                 .addOnCompleteListener(new OnCompleteListener<Void>() {
                     @Override
                     public void onComplete(@NonNull Task<Void> task) {
+                        progressBar.setVisibility(View.GONE);
                         if (task.isSuccessful()) {
                             Toast.makeText(ChangePassword.this,"Đổi mật khẩu thành công",
                                     Toast.LENGTH_SHORT).show();

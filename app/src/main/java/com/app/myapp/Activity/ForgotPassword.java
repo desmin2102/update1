@@ -6,7 +6,9 @@ import android.support.annotation.NonNull;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
@@ -26,6 +28,7 @@ public class ForgotPassword extends AppCompatActivity {
     private EditText txtEmailXT;
     private FirebaseAuth mAuth;
     private String userEmail;
+    private TextView txtDK;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,6 +43,11 @@ public class ForgotPassword extends AppCompatActivity {
         btnGui = findViewById(R.id.btnGui);
         progressBar = findViewById(R.id.progressBar);
         txtEmailXT=findViewById(R.id.txtEmailXT);
+        txtDK= findViewById(R.id.txtDK);
+
+        // Nút quay lại
+        ImageView imBack = findViewById(R.id.imBack);
+        imBack.setOnClickListener(v -> finish());
 
         btnGui.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -73,5 +81,12 @@ public class ForgotPassword extends AppCompatActivity {
             }
         });
 
+        txtDK.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(ForgotPassword.this,Register.class);
+                startActivity(intent);
+            }
+        });
     }
 }

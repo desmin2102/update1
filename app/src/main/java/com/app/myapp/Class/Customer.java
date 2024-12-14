@@ -5,8 +5,8 @@ public class Customer extends User {
     private int diemTV;
     private String rankTV;
 
-    public Customer(String userId, String email, String phone, String password, Boolean role, String idTV, int diemTV, String rankTV) {
-        super(userId, email, phone, password, role); // Truyền tham số role vào constructor của lớp User
+    public Customer(String userId, String ten, String email, String phone, String password, Boolean role, String idTV, int diemTV, String rankTV) {
+        super(userId, ten, email, phone, password, role); // Truyền tham số role vào constructor của lớp User
         this.idTV = idTV;
         this.diemTV = diemTV;
         this.rankTV = rankTV;

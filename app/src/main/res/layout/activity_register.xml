@@ -16,15 +16,22 @@
         android:orientation="vertical"
         tools:layout_editor_absoluteX="0dp"
         tools:layout_editor_absoluteY="0dp">
+        <ImageView
+            android:id="@+id/imBack_register"
+            android:layout_marginTop="5dp"
+            android:layout_width="60dp"
+            android:layout_height="40dp"
+            android:background="@color/back_backgroup"
+            app:srcCompat="@drawable/ic_arrowback_white_admin" />
 
         <TextView
             android:id="@+id/textView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginLeft="95dp"
-            android:layout_marginTop="70dp"
+            android:layout_marginTop="30dp"
             android:layout_marginRight="90dp"
-            android:layout_marginBottom="30dp"
+            android:layout_marginBottom="20dp"
             android:text="HGB Cinemas"
             android:textColor="#DA5D5D"
             android:textSize="35dp"
@@ -37,16 +44,29 @@
             android:textColor="@android:color/holo_orange_dark"
             android:layout_marginLeft="160dp"
             android:layout_marginRight="160dp"
-            android:layout_marginTop="10dp"
+            android:layout_marginTop="5dp"
             android:textSize="20dp"
             android:text="Đăng Ký" />
-
         <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/txtSDT"
             android:layout_width="335dp"
             android:layout_height="60dp"
             android:layout_marginLeft="40dp"
-            android:layout_marginTop="50dp"
+            android:layout_marginTop="40dp"
+            android:layout_marginRight="40dp">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/txtTen"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Họ và tên"
+                android:textColor="@android:color/white" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="335dp"
+            android:layout_height="60dp"
+            android:layout_marginLeft="40dp"
+            android:layout_marginTop="30dp"
             android:layout_marginRight="40dp">
 
             <com.google.android.material.textfield.TextInputEditText
@@ -54,10 +74,11 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="Số Điện Thoại"
-                android:textColor="@android:color/white" />
+                android:textColor="@android:color/white"
+                android:inputType="number"/>
         </com.google.android.material.textfield.TextInputLayout>
+
         <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/txtThongTin"
             android:layout_width="335dp"
             android:layout_height="60dp"
             android:layout_marginLeft="40dp"
@@ -69,7 +90,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="Email"
-                android:textColor="@android:color/white" />
+                android:textColor="@android:color/white"
+                android:inputType="textEmailAddress"/>
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
@@ -105,14 +127,17 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content">
         </ProgressBar>
-        <Button
+        <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/btDangKy2"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="150dp"
+            android:layout_marginLeft="160dp"
             android:layout_marginTop="10dp"
+            android:gravity="center"
             android:background="@drawable/intro_background"
-            android:text="Đăng Ký" />
+            android:text="Đăng Ký"
+            android:textColor="@color/white"
+            android:textSize="14dp" />
 
     </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

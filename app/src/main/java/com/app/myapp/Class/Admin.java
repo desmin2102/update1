@@ -8,8 +8,8 @@ public class Admin extends User {
     }
 
     // Constructor với các tham số
-    public Admin(String userId, String email, String phone, String password, Boolean role) {
-        super(userId, email, phone, password, role);
+    public Admin(String userId,String ten, String email, String phone, String password, Boolean role) {
+        super(userId, ten, email, phone, password, role);
     }
 
     // Các phương thức quản trị (ví dụ)
