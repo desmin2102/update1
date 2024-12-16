@@ -4,8 +4,10 @@ import java.util.Map;
 
 public class MovieSession {
     private String sessionId;
+    private String sessionName ;
     private String movieId;
     private String roomId;
+    private String startDay;
     private String startTime;
     private String endTime;
     private int availableSeats;
@@ -16,17 +18,32 @@ public class MovieSession {
         // Constructor mặc định cần cho Firebase
     }
 
-    public MovieSession(String sessionId, String movieId, String roomId, String startTime, String endTime, String price) {
+    public MovieSession(String sessionId, String seessionName,String movieId, String roomId,String startDay, String startTime, String endTime, String price) {
         this.sessionId = sessionId;
         this.movieId = movieId;
         this.roomId = roomId;
+        this.startDay=startDay;
         this.startTime = startTime;
         this.endTime = endTime;
         this.availableSeats = getTotalSeatsFromRoom(roomId);
         this.price = price; // Khởi tạo price
     }
+ public String getStartDay()
+ {
+     return startDay;
+ }
+ public void setStartDay()
+ {
+     this.startDay=startDay;
+ }
+    public String getSessionName() {
+        return sessionName;
+    }
 
-    // Getters và Setters
+    public void setSessionName(String sessionName) {
+        this.sessionName = sessionName;
+    }
+// Getters và Setters
 
     public String getSessionId() {
         return sessionId;

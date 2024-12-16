@@ -79,18 +79,19 @@ public class MovieSessionAdapter extends RecyclerView.Adapter<MovieSessionAdapte
         notifyDataSetChanged();
     }
 
-    private String formatTime(String dateTime) {
-        SimpleDateFormat originalFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault());
+    private String formatTime(String time) {
+        SimpleDateFormat originalFormat = new SimpleDateFormat("HH:mm", Locale.getDefault());
         SimpleDateFormat targetFormat = new SimpleDateFormat("HH:mm", Locale.getDefault());
         Date date;
         try {
-            date = originalFormat.parse(dateTime);
+            date = originalFormat.parse(time);
             return targetFormat.format(date);
         } catch (ParseException e) {
             e.printStackTrace();
-            return dateTime;
+            return time;
         }
     }
+
 
     static class MovieSessionViewHolder extends RecyclerView.ViewHolder {
         TextView roomNameTextView, timeTextView, availableSeatsTextView;

@@ -18,9 +18,11 @@ public class Rank {
         this.discount = discount;
     }
 
+
+
     // Getters and Setters
-    public String getId() { return rankId; }
-    public void setId(String id) { this.rankId = id; }
+    public String getRankIdId() { return rankId; }
+    public void setRankIdId(String id) { this.rankId = id; }
 
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }
