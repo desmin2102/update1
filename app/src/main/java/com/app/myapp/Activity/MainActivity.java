@@ -12,11 +12,8 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.appcompat.widget.Toolbar;
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.recyclerview.widget.RecyclerView;
@@ -24,14 +21,12 @@ import androidx.viewpager2.widget.CompositePageTransformer;
 import androidx.viewpager2.widget.MarginPageTransformer;
 import androidx.viewpager2.widget.ViewPager2;
 
-
 import com.app.myapp.Adapter.AdAdapter;
 import com.app.myapp.Adapter.MovieAdapter;
 import com.app.myapp.Class.Ad;
 import com.app.myapp.Class.Customer;
 import com.app.myapp.Class.Movie;
 import com.app.myapp.Class.Rank;
-import com.app.myapp.Class.User;
 import com.app.myapp.R;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
@@ -49,10 +44,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
-import java.util.UUID;
 
 import jp.wasabeef.glide.transformations.BlurTransformation;
 import me.relex.circleindicator.CircleIndicator3;
@@ -67,6 +59,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private FirebaseAuth mAuth;
     private ViewPager2 viewPagerqc;
     private ViewPager2 viewPagermv;
+    private ViewPager2 viewpagermMenu;
 
     private CircleIndicator3 circleIndicator;
     private Handler handler = new Handler(Looper.getMainLooper());
@@ -106,7 +99,28 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         backgroundImageView = findViewById(R.id.backgroundImageView);
         navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
-
+        bottomNavigationView = findViewById(R.id.bottomNavigationView);
+        bottomNavigationView.setSelectedItemId(R.id.home);
+        bottomNavigationView.setOnItemSelectedListener(menuItem -> {
+            int id = menuItem.getItemId(); if (id == R.id.home) {
+                return true;
+            }
+            else if (id == R.id.session) {
+                startActivity(new Intent(getApplicationContext(), SessionActivity.class));
+                overridePendingTransition(R.anim.slide_in_right,R.anim.slide_out_left);
+                finish();
+                return true; }
+            else if (id == R.id.movie) {
+                startActivity(new Intent(getApplicationContext(), MovieActivity.class));
+                overridePendingTransition(R.anim.slide_in_right,R.anim.slide_out_left);
+                finish();
+                return true; }
+            else if (id == R.id.promotion) {
+                startActivity(new Intent(getApplicationContext(), AdActivity.class));
+                overridePendingTransition(R.anim.slide_in_right,R.anim.slide_out_left);
+                finish();
+                return true; } else { return false; }
+        });
         FirebaseApp.initializeApp(this);
 
         init();

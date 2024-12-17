@@ -6,21 +6,18 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
-
 import com.app.myapp.Activity.SeatSelectionActivity;
 import com.app.myapp.Class.MovieSession;
 import com.app.myapp.Class.Room;
 import com.app.myapp.R;
-
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.Date;
+import java.util.Map;
 
 public class MovieSessionAdapter extends RecyclerView.Adapter<MovieSessionAdapter.MovieSessionViewHolder> {
 
@@ -74,11 +71,6 @@ public class MovieSessionAdapter extends RecyclerView.Adapter<MovieSessionAdapte
         return movieSessions.size();
     }
 
-    public void updateSessions(List<MovieSession> newSessions) {
-        this.movieSessions = newSessions;
-        notifyDataSetChanged();
-    }
-
     private String formatTime(String time) {
         SimpleDateFormat originalFormat = new SimpleDateFormat("HH:mm", Locale.getDefault());
         SimpleDateFormat targetFormat = new SimpleDateFormat("HH:mm", Locale.getDefault());
@@ -92,14 +84,13 @@ public class MovieSessionAdapter extends RecyclerView.Adapter<MovieSessionAdapte
         }
     }
 
-
     static class MovieSessionViewHolder extends RecyclerView.ViewHolder {
         TextView roomNameTextView, timeTextView, availableSeatsTextView;
 
         MovieSessionViewHolder(@NonNull View itemView) {
             super(itemView);
             roomNameTextView = itemView.findViewById(R.id.roomNameTextView);
-            timeTextView = itemView.findViewById(R.id.timeTextView); // TextView để hiển thị thời gian
+            timeTextView = itemView.findViewById(R.id.timeTextView);
             availableSeatsTextView = itemView.findViewById(R.id.availableSeatsTextView);
         }
     }

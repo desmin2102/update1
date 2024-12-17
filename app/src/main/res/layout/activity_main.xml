@@ -9,7 +9,14 @@
     android:fitsSystemWindows="true"
     tools:openDrawer="start"
     tools:context=".Activity.MainActivity">
-
+    <androidx.viewpager2.widget.ViewPager2
+        android:id="@+id/viewPagerMenu"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/bottomNavigationView"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
     <ImageView android:id="@+id/backgroundImageView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -131,7 +138,8 @@
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/bottomMenuContainer"
             android:layout_width="350dp"
-            android:layout_height="0dp"
+            android:layout_height="80dp"
+            android:layout_marginBottom="20dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent">
@@ -144,8 +152,8 @@
                 app:itemHorizontalTranslationEnabled="false"
                 app:itemIconSize="40dp"
                 app:itemIconTint="@color/white"
-                app:itemPadding="0dp"
-                app:labelVisibilityMode="unlabeled"
+                app:itemTextColor="@color/white"
+                app:labelVisibilityMode="labeled"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"

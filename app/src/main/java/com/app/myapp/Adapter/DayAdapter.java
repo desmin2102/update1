@@ -8,11 +8,10 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-
 import androidx.annotation.NonNull;
-import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
+import com.app.myapp.Class.Movie;
 import com.app.myapp.Class.MovieSession;
 import com.app.myapp.Class.Room;
 import com.app.myapp.R;
@@ -21,7 +20,6 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -36,22 +34,21 @@ public class DayAdapter extends RecyclerView.Adapter<DayAdapter.DayViewHolder> {
     private int selectedPosition = RecyclerView.NO_POSITION;
     private Context context;
     private RecyclerView movieSessionRecyclerView;
-    private MovieSessionAdapter movieSessionAdapter;
+    private SessionAdapter sessionAdapter;
     private Map<String, Room> roomMap = new HashMap<>();
-    private String movieId;
     private String locationId;
+    private String movieId; // Thêm biến movieId
 
-    public DayAdapter(List<Calendar> dayList, Context context, RecyclerView movieSessionRecyclerView, String movieId, String locationId) {
+    public DayAdapter(List<Calendar> dayList, Context context, RecyclerView movieSessionRecyclerView, String locationId, String movieId) {
         this.dayList = dayList;
         this.context = context;
         this.movieSessionRecyclerView = movieSessionRecyclerView;
-        this.movieId = movieId;
         this.locationId = locationId;
+        this.movieId = movieId; // Nhận movieId từ constructor
         loadRooms();
         if (!dayList.isEmpty()) {
             selectFirstDay();
         }
-        Log.d("DayAdapter", "Initialized with movieId: " + movieId + ", locationId: " + locationId);
     }
 
     @NonNull
@@ -91,11 +88,6 @@ public class DayAdapter extends RecyclerView.Adapter<DayAdapter.DayViewHolder> {
         return dayList.size();
     }
 
-    private String getLocationIdFromRoomId(String roomId) {
-        Room room = roomMap.get(roomId);
-        return room != null ? room.getLocationId() : null;
-    }
-
     static class DayViewHolder extends RecyclerView.ViewHolder {
         TextView dayOfWeekTextView, dateTextView;
 
@@ -115,7 +107,7 @@ public class DayAdapter extends RecyclerView.Adapter<DayAdapter.DayViewHolder> {
 
     @SuppressLint("NotifyDataSetChanged")
     private void showMovieDetails(Calendar calendar) {
-        Log.d("DayAdapter", "Showing details for movieId: " + movieId + ", locationId: " + locationId);
+        Log.d("DayAdapter", "Showing details for locationId: " + locationId);
 
         DatabaseReference sessionsRef = FirebaseDatabase.getInstance().getReference("MovieSession");
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
@@ -124,26 +116,44 @@ public class DayAdapter extends RecyclerView.Adapter<DayAdapter.DayViewHolder> {
         sessionsRef.orderByChild("startDay").equalTo(dateString).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                List<MovieSession> movieSessions = new ArrayList<>();
+                Map<String, List<MovieSession>> movieSessionsMap = new HashMap<>();
+
                 for (DataSnapshot sessionSnapshot : dataSnapshot.getChildren()) {
                     MovieSession session = sessionSnapshot.getValue(MovieSession.class);
                     Log.d("DayAdapter", "Loaded session: " + session);
-                    if (session != null && session.getMovieId().equals(movieId) && getLocationIdFromRoomId(session.getRoomId()).equals(locationId)) {
-                        movieSessions.add(session);
+                    if (session != null && getLocationIdFromRoomId(session.getRoomId()).equals(locationId)) {
+                        if (movieId == null || session.getMovieId().equals(movieId)) { // Kiểm tra movieId
+                            if (!movieSessionsMap.containsKey(session.getMovieId())) {
+                                movieSessionsMap.put(session.getMovieId(), new ArrayList<>());
+                            }
+                            movieSessionsMap.get(session.getMovieId()).add(session);
+                        }
                     }
                 }
 
-                if (movieSessions.isEmpty()) {
-                    Log.d("DayAdapter", "No sessions found for movieId: " + movieId + " on date: " + dateString);
-                }
+                List<Movie> movies = new ArrayList<>();
+                DatabaseReference moviesRef = FirebaseDatabase.getInstance().getReference("Movie");
+                moviesRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot movieSnapshot) {
+                        for (DataSnapshot movieData : movieSnapshot.getChildren()) {
+                            Movie movie = movieData.getValue(Movie.class);
+                            if (movie != null && (movieId == null || movie.getId().equals(movieId))) { // Kiểm tra movieId
+                                movies.add(movie);
+                                Log.d("DayAdapter", "Loaded movie: " + movie.getTitle());
+                            }
+                        }
+                        sessionAdapter = new SessionAdapter(movies, movieSessionsMap, roomMap, context); // Cập nhật constructor của SessionAdapter
+                        movieSessionRecyclerView.setLayoutManager(new LinearLayoutManager(context));
+                        movieSessionRecyclerView.setAdapter(sessionAdapter);
+                        sessionAdapter.notifyDataSetChanged(); // Cập nhật dữ liệu cho RecyclerView
+                    }
 
-                if (movieSessionAdapter == null) {
-                    movieSessionAdapter = new MovieSessionAdapter(movieSessions, roomMap, context);
-                    movieSessionRecyclerView.setLayoutManager(new GridLayoutManager(context, 3));
-                    movieSessionRecyclerView.setAdapter(movieSessionAdapter);
-                } else {
-                    movieSessionAdapter.updateSessions(movieSessions);
-                }
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) {
+                        Log.e("DayAdapter", "Failed to load movies: " + databaseError.getMessage());
+                    }
+                });
             }
 
             @Override
@@ -151,6 +161,11 @@ public class DayAdapter extends RecyclerView.Adapter<DayAdapter.DayViewHolder> {
                 Log.e("DayAdapter", "Failed to load movie sessions: " + databaseError.getMessage());
             }
         });
+    }
+
+    private String getLocationIdFromRoomId(String roomId) {
+        Room room = roomMap.get(roomId);
+        return room != null ? room.getLocationId() : null;
     }
 
     private void loadRooms() {

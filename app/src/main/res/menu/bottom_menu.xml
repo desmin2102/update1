@@ -8,18 +8,17 @@
         android:icon="@drawable/ic_home"/>
 
     <item
-        android:id="@+id/ticket"
-        android:title="Ticket"
-        android:icon="@drawable/ic_ticket"
+        android:id="@+id/session"
+        android:title="Session"
+        android:icon="@drawable/ic_theater"
         />
-
     <item
-        android:id="@+id/history"
-        android:title="History"
-        android:icon="@drawable/ic_history" />
+        android:id="@+id/movie"
+        android:title="Movie"
+        android:icon="@drawable/ic_movie" />
     <item
-        android:id="@+id/library"
-        android:title="Account"
-        android:icon="@drawable/ic_account" />
+        android:id="@+id/promotion"
+        android:title="Promotion"
+        android:icon="@drawable/ic_promotion" />
 
 </menu>

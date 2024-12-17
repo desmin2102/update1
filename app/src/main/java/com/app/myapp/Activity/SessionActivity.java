@@ -1,5 +1,6 @@
 package com.app.myapp.Activity;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import androidx.appcompat.app.AppCompatActivity;
@@ -14,6 +15,7 @@ import android.widget.Spinner;
 import com.app.myapp.Adapter.DayAdapter;
 import com.app.myapp.Class.Room;
 import com.app.myapp.R;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -25,7 +27,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class ScheduleActivity extends AppCompatActivity {
+public class SessionActivity extends AppCompatActivity {
 
     private RecyclerView recyclerView;
     private RecyclerView movieSessionRecyclerView;
@@ -36,19 +38,41 @@ public class ScheduleActivity extends AppCompatActivity {
     private String selectedLocationId;
     private String movieId; // Thêm biến movieId
     private Map<String, Room> roomMap = new HashMap<>();
+    private BottomNavigationView bottomNavigationView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_schedule);
+        setContentView(R.layout.session_activity);
 
         movieId = getIntent().getStringExtra("movieId"); // Nhận movieId từ Intent
 
-        toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-        if (getSupportActionBar() != null) {
-            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        }
+        bottomNavigationView = findViewById(R.id.bottomNavigationView);
+        bottomNavigationView.setSelectedItemId(R.id.session);
+        bottomNavigationView.setOnItemSelectedListener(menuItem -> {
+            bottomNavigationView.getMenu().setGroupCheckable(0, true, true);
+            int id = menuItem.getItemId();
+            if (id == R.id.home) {
+                startActivity(new Intent(getApplicationContext(), MainActivity.class));
+                overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
+                finish();
+                return true;
+            } else if (id == R.id.session) {
+                return true;
+            } else if (id == R.id.movie) {
+                startActivity(new Intent(getApplicationContext(), MovieActivity.class));
+                overridePendingTransition(R.anim.slide_in_right,R.anim.slide_out_left);
+                finish();
+                return true;
+            } else if (id == R.id.promotion) {
+                startActivity(new Intent(getApplicationContext(), AdActivity.class));
+                overridePendingTransition(R.anim.slide_in_right,R.anim.slide_out_left);
+                finish();
+                return true;
+            } else {
+                return false;
+            }
+        });
 
         recyclerView = findViewById(R.id.recyclerView);
         movieSessionRecyclerView = findViewById(R.id.sessionRecycleview);
@@ -80,7 +104,7 @@ public class ScheduleActivity extends AppCompatActivity {
                         locationIds.add(locationId);
                     }
                 }
-                ArrayAdapter<String> adapter = new ArrayAdapter<>(ScheduleActivity.this, android.R.layout.simple_spinner_item, locationAddressList);
+                ArrayAdapter<String> adapter = new ArrayAdapter<>(SessionActivity.this, android.R.layout.simple_spinner_item, locationAddressList);
                 adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
                 spinnerLocation.setAdapter(adapter);
 
@@ -104,12 +128,15 @@ public class ScheduleActivity extends AppCompatActivity {
                         // Xử lý nếu không có lựa chọn nào được chọn
                     }
                 });
+
+                // Cập nhật DayAdapter lần đầu tiên
+                updateDayAdapter(selectedLocationId);
             }
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
                 // Xử lý lỗi nếu cần
-                Log.e("ScheduleActivity", "Failed to load locations: " + databaseError.getMessage());
+                Log.e("SessionActivity", "Failed to load locations: " + databaseError.getMessage());
             }
         });
     }

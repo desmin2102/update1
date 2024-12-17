@@ -5,15 +5,24 @@ public class Ad{
     private String id;
     private String note;
     private String mediaurl;
-
+    private String adName;
     public Ad()
     {
 
     }
-    public Ad(String id, String note, String mediaurl) {
+    public Ad(String id, String note, String mediaurl,String adName) {
         this.id = id;
         this.note = note;
         this.mediaurl = mediaurl;
+        this.adName=adName;
+    }
+
+    public String getAdName() {
+        return adName;
+    }
+
+    public void setAdName(String adName) {
+        this.adName = adName;
     }
 
     public String getId() {
