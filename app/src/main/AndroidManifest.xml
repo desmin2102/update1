@@ -36,29 +36,29 @@
             android:exported="false" />
         <!--Cac activity-->
         <!--Admin-->
-<!--        <activity-->
-<!--            android:name=".Activity.AdminMainActivity"-->
-<!--            android:exported="false" />-->
+        <activity
+            android:name=".Activity.AdminMainActivity"
+            android:exported="false" />
 
-<!--        <activity-->
-<!--            android:name=".Activity.QuanLyBacThanhVienActivity"-->
-<!--            android:exported="false" />-->
+        <activity
+            android:name=".Activity.QuanLyBacThanhVienActivity"
+            android:exported="false" />
 
-<!--        <activity-->
-<!--            android:name=".Activity.QuanLyNguoiDungActivity"-->
-<!--            android:exported="false" />-->
+        <activity
+            android:name=".Activity.QuanLyNguoiDungActivity"
+            android:exported="false" />
 
-<!--        <activity-->
-<!--            android:name=".Activity.QuanLyPhimActivity"-->
-<!--            android:exported="false" />-->
+        <activity
+            android:name=".Activity.QuanLyPhimActivity"
+            android:exported="false" />
 
-<!--        <activity-->
-<!--            android:name=".Activity.QuanLyPhimDetailActivity"-->
-<!--            android:exported="false" />-->
+        <activity
+            android:name=".Activity.QuanLyPhimDetailActivity"
+            android:exported="false" />
 
-<!--        <activity-->
-<!--            android:name=".Activity.QuanLyPhongActivity"-->
-<!--            android:exported="false" />-->
+        <activity
+            android:name=".Activity.QuanLyPhongActivity"
+            android:exported="false" />
 
         <activity
             android:name=".Activity.QuanLyQuangCaoActivity"
@@ -90,7 +90,7 @@
             android:name=".Activity.Register"
             android:exported="false" />
         <activity
-            android:name=".Activity.Login"
+            android:name=".Activity.MainActivity"
             android:exported="false" />
         <activity android:name=".Activity.PaymentActivity"
             android:exported="true"
@@ -109,7 +109,7 @@
         <activity android:name=".Activity.MovieDetailsActivity" />
         <activity android:name=".Activity.ScheduleActivity"/>
         <activity
-            android:name=".Activity.MainActivity"
+            android:name=".Activity.Login"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

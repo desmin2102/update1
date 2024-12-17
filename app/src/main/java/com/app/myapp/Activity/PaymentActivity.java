@@ -294,10 +294,18 @@ public class PaymentActivity extends AppCompatActivity {
                                 String price = dataSnapshot.child("price").getValue(String.class);
                                 // Lấy tên phim, tên phòng và tên địa điểm
                                 fetchDetails(movieId, roomId, locationId, seatName, ticketId, startTime, price, userId, invoiceId);
-                                String purchasedSeatId = seatsRef.push().getKey(); if (purchasedSeatId != null) {
+                                String purchasedSeatId = seatsRef.push().getKey();
+                                if (purchasedSeatId != null) {
                                     Seat purchasedSeat = new Seat(purchasedSeatId, String.valueOf(seatName.charAt(0)), Integer.parseInt(seatName.substring(1)), sessionId, seatName);
                                     seatsRef.child(purchasedSeatId).setValue(purchasedSeat).addOnCompleteListener(task -> {
-                                        if (!task.isSuccessful()) { Toast.makeText(PaymentActivity.this, "Lỗi khi lưu thông tin ghế đã mua", Toast.LENGTH_SHORT).show(); } }); }
+                                        if (!task.isSuccessful()) {
+                                            Toast.makeText(PaymentActivity.this, "Lỗi khi lưu thông tin ghế đã mua", Toast.LENGTH_SHORT).show();
+                                        } else {
+                                            // Cập nhật số lượng ghế còn lại trong MovieSession
+                                            updateAvailableSeats(sessionId, selectedSeats.size());
+                                        }
+                                    });
+                                }
                             }
                         }
 
@@ -310,6 +318,39 @@ public class PaymentActivity extends AppCompatActivity {
             }
         }
     }
+
+    private void updateAvailableSeats(String sessionId, int seatsDelta) {
+        DatabaseReference sessionRef = FirebaseDatabase.getInstance().getReference("MovieSession").child(sessionId);
+        sessionRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if (dataSnapshot.exists()) {
+                    // Lấy thông tin phiên chiếu hiện tại
+                    MovieSession session = dataSnapshot.getValue(MovieSession.class);
+                    if (session != null) {
+                        // Cập nhật số lượng ghế còn lại
+                        int updatedAvailableSeats = session.getAvailableSeats() - seatsDelta;
+                        if (updatedAvailableSeats < 0) {
+                            updatedAvailableSeats = 0; // Đảm bảo số ghế không bị âm
+                        }                        sessionRef.child("availableSeats").setValue(updatedAvailableSeats)
+                                .addOnCompleteListener(task -> {
+                                    if (task.isSuccessful()) {
+                                        Log.d("PaymentActivity", "Available seats updated successfully.");
+                                    } else {
+                                        Log.e("PaymentActivity", "Failed to update available seats: " + task.getException().getMessage());
+                                    }
+                                });
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                Log.e("PaymentActivity", "Failed to read session: " + databaseError.getMessage());
+            }
+        });
+    }
+
 
 
 
