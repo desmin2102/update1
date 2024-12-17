@@ -48,6 +48,7 @@ public class ScheduleActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            getSupportActionBar().setTitle("Chọn suất"); // Đặt tiêu đề mới
         }
 
         recyclerView = findViewById(R.id.recyclerView);

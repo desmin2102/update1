@@ -3,7 +3,8 @@ package com.app.myapp.Class;
 public class Invoice {
     private String invoiceId;
     private int totalTickets;
-    private int totalPrice;
+    private double priceDiscount;
+    private double totalPrice;
     private String userId;
     private String purchaseDate; // Thêm trường purchaseDate
 
@@ -11,7 +12,7 @@ public class Invoice {
         // Constructor mặc định cần cho Firebase
     }
 
-    public Invoice(String invoiceId, int totalTickets, int totalPrice, String userId, String purchaseDate) {
+    public Invoice(String invoiceId, int totalTickets, double priceDiscount,double totalPrice, String userId, String purchaseDate) {
         this.invoiceId = invoiceId;
         this.totalTickets = totalTickets;
         this.totalPrice = totalPrice;
@@ -20,6 +21,13 @@ public class Invoice {
     }
 
     // Getters và Setters
+    public double getPriceDiscount() {
+        return priceDiscount;
+    }
+
+    public void setPriceDiscount(double priceDiscount) {
+        this.priceDiscount = priceDiscount;
+    }
 
     public String getInvoiceId() {
         return invoiceId;
@@ -37,11 +45,11 @@ public class Invoice {
         this.totalTickets = totalTickets;
     }
 
-    public int getTotalPrice() {
+    public double getTotalPrice() {
         return totalPrice;
     }
 
-    public void setTotalPrice(int totalPrice) {
+    public void setTotalPrice(double totalPrice) {
         this.totalPrice = totalPrice;
     }
 

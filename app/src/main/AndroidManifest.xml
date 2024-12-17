@@ -94,7 +94,7 @@
             android:exported="false" />
         <activity android:name=".Activity.PaymentActivity"
             android:exported="true"
-            android:label="Merchant Demo"
+            android:label="Thanh toán"
             android:launchMode="singleTask">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW"/>

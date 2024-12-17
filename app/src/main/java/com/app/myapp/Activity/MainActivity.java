@@ -74,7 +74,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private DrawerLayout drawerLayout;
     private BottomNavigationView bottomNavigationView;
 
-    private Button buttonBooking;
     private ImageView backgroundImageView;
     private TextView txt_name, txt_email;
     private NavigationView navigationView;
@@ -181,7 +180,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     private void initializeBookingButton() {
-        buttonBooking = findViewById(R.id.button);
+        Button buttonBooking = findViewById(R.id.button);
         buttonBooking.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

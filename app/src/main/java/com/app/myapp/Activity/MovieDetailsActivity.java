@@ -3,6 +3,7 @@ package com.app.myapp.Activity;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -19,6 +20,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.app.myapp.Adapter.ReviewAdapter;
+import com.app.myapp.Class.Movie;
 import com.app.myapp.Class.Review;
 import com.app.myapp.R;
 import com.app.myapp.Activity.ReviewDialogFragment;
@@ -49,6 +51,7 @@ public class MovieDetailsActivity extends AppCompatActivity {
     private ReviewAdapter reviewAdapter;
     private List<Review> reviewList;
     private Button rateReviewButton; // Nút Rate and Review
+    private Button buyTicketButton;
     private FirebaseUser currentUser;
     private boolean hasWatchedMovie = false; // Trạng thái xem phim
 
@@ -61,6 +64,7 @@ public class MovieDetailsActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
         Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
+        getSupportActionBar().setTitle("Chi tiết phim"); // Đặt tiêu đề mới
 
         movieImageView = findViewById(R.id.movie_image);
         movieTitleTextView = findViewById(R.id.movie_title);
@@ -72,7 +76,7 @@ public class MovieDetailsActivity extends AppCompatActivity {
         movieTrailerView = findViewById(R.id.movie_trailer);
         recyclerViewReviews = findViewById(R.id.recyclerView_comments);
         rateReviewButton = findViewById(R.id.rateReviewButton); // Nút Rate and Review
-
+        buyTicketButton=findViewById(R.id.buyTicketButton);
         recyclerViewReviews.setLayoutManager(new LinearLayoutManager(this));
         reviewList = new ArrayList<>();
         reviewAdapter = new ReviewAdapter(this, reviewList);
@@ -123,6 +127,12 @@ public class MovieDetailsActivity extends AppCompatActivity {
             } else {
                 showWatchedMovieRequiredMessage();
             }
+        });
+        buyTicketButton.setOnClickListener(v -> {
+            // Mở LocationActivity khi nhấn nút Booking
+            Intent intent = new Intent(MovieDetailsActivity.this, ScheduleActivity.class);
+            intent.putExtra("movieId", movieId); // Truyền ID của bộ phim
+            startActivity(intent);
         });
     }
 

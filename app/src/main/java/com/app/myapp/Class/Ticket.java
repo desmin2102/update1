@@ -6,22 +6,31 @@ public class Ticket {
     private String sessionId;
     private String price;
     private String userId;
-
+    private String invoiceId;
 
     public Ticket() {
         // Constructor mặc định cần cho Firebase
     }
 
-    public Ticket(String ticketId, String seatName, String sessionId, String price, String userId) {
+    public Ticket(String ticketId, String seatName, String sessionId, String price, String userId,String invoiceId) {
         this.ticketId = ticketId;
         this.seatName = seatName;
         this.sessionId = sessionId;
         this.price = price;
         this.userId = userId;
+        this.invoiceId=invoiceId;
 
     }
 
     // Getters và Setters
+    public String getInvoiceId() {
+        return invoiceId;
+    }
+
+    public void setInvoiceId(String ticketId) {
+        this.invoiceId = invoiceId;
+    }
+
 
     public String getTicketId() {
         return ticketId;

@@ -1,6 +1,6 @@
 package com.app.myapp.Class;
 
-public class Room {
+public class    Room {
     private String roomId;
     private String roomName;
     private int totalSeats;

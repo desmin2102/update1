@@ -15,6 +15,7 @@ import com.app.myapp.Class.Customer;
 import com.app.myapp.Class.Invoice;
 import com.app.myapp.Class.MovieSession;
 import com.app.myapp.Class.Movie;
+import com.app.myapp.Class.Rank;
 import com.app.myapp.Class.Room;
 import com.app.myapp.Class.Seat;
 import com.app.myapp.Class.Ticket;
@@ -22,6 +23,7 @@ import com.app.myapp.Model.CreateOrder;
 import com.app.myapp.R;
 import com.bumptech.glide.Glide;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -53,7 +55,9 @@ public class PaymentActivity extends AppCompatActivity {
     private String sessionId;
     private String totalPrice;
     private ArrayList<String> selectedSeats;
-
+    private TextView giamgiaTextView;
+    private double priceDiscount;
+    private double ticketPriceAfterDiscount;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -77,6 +81,7 @@ public class PaymentActivity extends AppCompatActivity {
         sessionId = getIntent().getStringExtra("sessionId");
         totalPrice = getIntent().getStringExtra("totalPrice"); // Đảm bảo nhận đúng giá trị
         selectedSeats = getIntent().getStringArrayListExtra("selectedSeats");
+        Log.d("PaymentActivity", "Received sessionId: " + sessionId); Log.d("PaymentActivity", "Received totalPrice: " + totalPrice); Log.d("PaymentActivity", "Received selectedSeats: " + selectedSeats.size());
 
         // Ánh xạ các view
         movieImageView = findViewById(R.id.movieImageView);
@@ -88,9 +93,10 @@ public class PaymentActivity extends AppCompatActivity {
         btnThanhToanB=findViewById(R.id.btnthanhtoanbth);
         soLuongVeTextView = findViewById(R.id.soluongveTextView);
         viTriGheTextView = findViewById(R.id.vitrigheTextView);
+        giamgiaTextView=findViewById(R.id.giamgiaTextView);
 
+        applyDiscountBasedOnRank();
         // Hiển thị giá vé
-        priceTextView.setText("Tổng tiền: " + totalPrice + " đồng");
         soLuongVeTextView.setText("Số lượng vé: " + selectedSeats.size());
         viTriGheTextView.setText("Vị trí ghế: " + String.join(", ", selectedSeats));
         // Khởi tạo dữ liệu
@@ -190,6 +196,75 @@ public class PaymentActivity extends AppCompatActivity {
         return startDay + " " + startTime + " - " + endTime; // Trường hợp lỗi định dạng thời gian
     }
 
+    public void applyDiscountBasedOnRank() {
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if (user != null) {
+            String userId = user.getUid();
+            Log.d("applyDiscountBasedOnRank", "User ID: " + userId);
+
+            // Truy vấn thông tin user từ Firebase
+            DatabaseReference userRef = FirebaseDatabase.getInstance().getReference("User").child(userId);
+            userRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    Customer customer = dataSnapshot.getValue(Customer.class);
+                    if (customer != null) {
+                        String rankId = customer.getRankId();
+                        Log.d("applyDiscountBasedOnRank", "Rank ID: " + rankId);
+
+                        // Truy vấn thông tin rank dựa trên rankId
+                        DatabaseReference rankRef = FirebaseDatabase.getInstance().getReference("Rank").child(rankId);
+                        rankRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                Rank rank = dataSnapshot.getValue(Rank.class);
+                                if (rank != null) {
+                                    double discount = rank.getDiscount();
+                                    double totalPriceDouble = Double.parseDouble(totalPrice); // Chuyển đổi totalPrice sang số thực
+                                    priceDiscount = totalPriceDouble * discount; // Tính giá giảm
+                                    double priceAfterDiscount = totalPriceDouble - priceDiscount;
+                                    totalPrice = String.valueOf(priceAfterDiscount); // Cập nhật totalPrice sau giảm giá
+
+                                    // Tính giá vé sau giảm giá
+                                    ticketPriceAfterDiscount = priceAfterDiscount / selectedSeats.size();
+
+                                    Log.d("applyDiscountBasedOnRank", "Discount: " + discount);
+                                    Log.d("applyDiscountBasedOnRank", "Total Price After Discount: " + priceAfterDiscount);
+                                    Log.d("applyDiscountBasedOnRank", "Ticket Price After Discount: " + ticketPriceAfterDiscount);
+
+                                    // Cập nhật giao diện người dùng trên luồng chính
+                                    runOnUiThread(() -> {
+                                        // Hiển thị giá đã giảm
+                                        giamgiaTextView.setText("Giá đã giảm: " + String.format("%.0f", priceDiscount) + " đồng");
+                                        Log.d("applyDiscountBasedOnRank", "Discount TextView Updated: " + String.format("%.0f", priceDiscount) + " đồng");
+
+                                        // Hiển thị tổng tiền sau giảm giá
+                                        priceTextView.setText("Tổng tiền: " + String.format("%.0f", priceAfterDiscount) + " đồng");
+                                        Log.d("applyDiscountBasedOnRank", "Total Price TextView Updated: " + String.format("%.0f", priceAfterDiscount) + " đồng");
+                                    });
+                                }
+                            }
+
+                            @Override
+                            public void onCancelled(@NonNull DatabaseError databaseError) {
+                                Log.e("applyDiscountBasedOnRank", "Rank Data Retrieval Cancelled: " + databaseError.getMessage());
+                            }
+                        });
+                    } else {
+                        Log.e("applyDiscountBasedOnRank", "Customer is null");
+                    }
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {
+                    Log.e("applyDiscountBasedOnRank", "User Data Retrieval Cancelled: " + databaseError.getMessage());
+                }
+            });
+        } else {
+            Log.e("applyDiscountBasedOnRank", "User is null");
+        }
+    }
+
 
     private void loadMovieData(String movieId) {
         DatabaseReference movieRef = FirebaseDatabase.getInstance().getReference("Movie").child(movieId);
@@ -266,7 +341,7 @@ public class PaymentActivity extends AppCompatActivity {
         DatabaseReference invoicesRef = FirebaseDatabase.getInstance().getReference("Invoice");
         String invoiceId = invoicesRef.push().getKey();
         if (invoiceId != null) {
-            Invoice invoice = new Invoice(invoiceId, selectedSeats.size(), Integer.parseInt(totalPrice), userId, getCurrentDate());
+            Invoice invoice = new Invoice(invoiceId, selectedSeats.size(), priceDiscount, Double.parseDouble(totalPrice), userId, getCurrentDate());
             invoicesRef.child(invoiceId).setValue(invoice).addOnCompleteListener(task -> {
                 if (task.isSuccessful()) {
                     Toast.makeText(PaymentActivity.this, "Hóa đơn đã được lưu", Toast.LENGTH_SHORT).show();
@@ -293,7 +368,7 @@ public class PaymentActivity extends AppCompatActivity {
                                 String startTime = dataSnapshot.child("startTime").getValue(String.class);
                                 String price = dataSnapshot.child("price").getValue(String.class);
                                 // Lấy tên phim, tên phòng và tên địa điểm
-                                fetchDetails(movieId, roomId, locationId, seatName, ticketId, startTime, price, userId, invoiceId);
+                                fetchDetails(movieId, roomId, locationId, seatName, ticketId, startTime, String.valueOf((int) ticketPriceAfterDiscount), userId, invoiceId);
                                 String purchasedSeatId = seatsRef.push().getKey();
                                 if (purchasedSeatId != null) {
                                     Seat purchasedSeat = new Seat(purchasedSeatId, String.valueOf(seatName.charAt(0)), Integer.parseInt(seatName.substring(1)), sessionId, seatName);
@@ -318,6 +393,8 @@ public class PaymentActivity extends AppCompatActivity {
             }
         }
     }
+
+
 
     private void updateAvailableSeats(String sessionId, int seatsDelta) {
         DatabaseReference sessionRef = FirebaseDatabase.getInstance().getReference("MovieSession").child(sessionId);
@@ -377,7 +454,7 @@ public class PaymentActivity extends AppCompatActivity {
                                 String locationName = dataSnapshot.child("name").getValue(String.class);
 
                                 // Lưu vé vào Firebase
-                                Ticket ticket = new Ticket(ticketId, seatName, sessionId, price, userId);
+                                Ticket ticket = new Ticket(ticketId, seatName, sessionId, price, userId,invoiceId);
                                 DatabaseReference ticketsRef = FirebaseDatabase.getInstance().getReference("Ticket");
                                 ticketsRef.child(ticketId).setValue(ticket).addOnCompleteListener(task -> {
                                     if (task.isSuccessful()) {

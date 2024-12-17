@@ -51,6 +51,8 @@ public class SeatSelectionActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            getSupportActionBar().setTitle("Chọn ghế"); // Đặt tiêu đề mới
+
         }
 
         toolbar.setNavigationOnClickListener(v -> onBackPressed());
