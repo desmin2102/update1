@@ -49,7 +49,6 @@ public class QuanLyNguoiDungDetailActivity extends AppCompatActivity {
         editTaiKhoan = findViewById(R.id.editGiamGia);
         editMatKhau = findViewById(R.id.editDiem);
         editPhone=findViewById(R.id.editphone);
-        editName=findViewById(R.id.editName);
         spinnerUserRole = findViewById(R.id.spinnerUserRole);
         btThemAdmin = findViewById(R.id.btThemAdmin);
         btSuaAdmin = findViewById(R.id.btSuaAdmin);
@@ -99,7 +98,7 @@ public class QuanLyNguoiDungDetailActivity extends AppCompatActivity {
 
     private void addUser() {
         // Lấy dữ liệu từ các ô nhập
-        String name = editName.getText().toString().trim();
+        String name = editTenUser.getText().toString().trim();
         String taiKhoan = editTaiKhoan.getText().toString().trim();
         String matKhau = editMatKhau.getText().toString().trim();
         String phone = editPhone.getText().toString().trim();
@@ -132,7 +131,7 @@ public class QuanLyNguoiDungDetailActivity extends AppCompatActivity {
                                             if (task1.isSuccessful()) {
                                                 Toast.makeText(QuanLyNguoiDungDetailActivity.this, "Tạo Tài Khoản Thành Công!", Toast.LENGTH_SHORT).show();
                                                 // Chuyển hướng đến trang MainActivity
-                                                startActivity(new Intent(QuanLyNguoiDungDetailActivity.this, QuanLyNguoiDungDetailActivity.class));
+                                                startActivity(new Intent(QuanLyNguoiDungDetailActivity.this, QuanLyNguoiDungActivity.class));
                                                 finish();
                                             } else {
                                                 Toast.makeText(QuanLyNguoiDungDetailActivity.this, "Lỗi khi lưu vào Firebase!", Toast.LENGTH_SHORT).show();

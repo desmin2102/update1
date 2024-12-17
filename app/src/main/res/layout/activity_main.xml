@@ -65,7 +65,9 @@
                         android:textStyle="bold"
                         android:textColor="@color/Pink"
                         tools:layout_editor_absoluteX="120dp"
-                        tools:layout_editor_absoluteY="10dp"></TextView>
+                        tools:layout_editor_absoluteY="10dp">
+
+                    </TextView>
 
                 </androidx.constraintlayout.widget.ConstraintLayout>
 

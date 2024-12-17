@@ -21,6 +21,7 @@ import androidx.viewpager2.widget.CompositePageTransformer;
 import androidx.viewpager2.widget.MarginPageTransformer;
 import androidx.viewpager2.widget.ViewPager2;
 
+import com.app.myapp.Activity.fragment.ThayDoiThongTin;
 import com.app.myapp.Adapter.AdAdapter;
 import com.app.myapp.Adapter.MovieAdapter;
 import com.app.myapp.Class.Ad;
@@ -84,19 +85,27 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         setContentView(R.layout.activity_main);
 
         drawerLayout = findViewById(R.id.main);
+        backgroundImageView = findViewById(R.id.backgroundImageView);
+        navigationView = findViewById(R.id.nav_view);
         ImageView imageAccount = findViewById(R.id.imageAccount);
         // Thiết lập biểu tượng tùy chỉnh làm biểu tượng điều hướng
+
         // Xử lý sự kiện nhấp vào biểu tượng điều hướng
         imageAccount.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // Mở ngăn kéo điều hướng
-                drawerLayout.openDrawer(GravityCompat.START);
+                mAuth = FirebaseAuth.getInstance();
+                FirebaseUser currentUser = mAuth.getCurrentUser();
+                if (currentUser != null) {
+                    // Mở ngăn kéo điều hướng
+                    drawerLayout.openDrawer(GravityCompat.START);
+
+                } else {
+                    startActivity(new Intent(MainActivity.this, Login.class));
+                }
             }
         });
 
-        backgroundImageView = findViewById(R.id.backgroundImageView);
-        navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
         bottomNavigationView = findViewById(R.id.bottomNavigationView);
         bottomNavigationView.setSelectedItemId(R.id.home);
@@ -394,7 +403,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             startActivity(new Intent(MainActivity.this,VeCuaToi.class));
         }else
         if (id == R.id.nav_changeTT) {
-            startActivity(new Intent(MainActivity.this,ChangePassword.class));
+            startActivity(new Intent(MainActivity.this, ThayDoiThongTin.class));
         }else
         if (id == R.id.nav_point) {
             startActivity(new Intent(MainActivity.this, ChinhSach.class));

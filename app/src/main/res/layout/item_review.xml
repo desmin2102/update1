@@ -3,6 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="120dp"
     android:orientation="horizontal"
+    android:layout_marginTop="10dp"
     xmlns:android="http://schemas.android.com/apk/res/android">
 
     <!-- Khung bên trái (chiếm 100dp) -->
@@ -28,7 +29,7 @@
             android:layout_height="wrap_content"
             android:text="Tên"
             android:textSize="16sp"
-            android:textColor="@android:color/black"
+            android:textColor="@android:color/white"
             android:gravity="center"/>
 
         <!-- Thời gian bình luận -->
@@ -60,7 +61,7 @@
             android:numStars="5"
             android:rating="0"
             android:stepSize="0.5"
-            android:isIndicator="true"/>
+            android:isIndicator="true" />
 
         <TextView
             android:id="@+id/review"
@@ -68,7 +69,7 @@
             android:layout_height="match_parent"
             android:text=""
             android:textSize="18sp"
-            android:textColor="@android:color/black"
+            android:textColor="@android:color/white"
             />
     </LinearLayout>
 </LinearLayout>

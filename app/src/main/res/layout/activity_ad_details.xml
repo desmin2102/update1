@@ -2,45 +2,59 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical">
 
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
-        android:background="?attr/colorPrimary"
+        android:background="@drawable/thanh_tieu_de"
         android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
         android:popupTheme="@style/ThemeOverlay.AppCompat.Light"/>
-<LinearLayout
-    android:layout_width="match_parent"
-    android:layout_height="500dp">
-    <ImageView
-        android:id="@+id/ad_detail_image"
+
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:scaleType="centerCrop" />
-</LinearLayout>
+        android:layout_height="match_parent">
 
-    <LinearLayout
-
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical">
-
-        <TextView
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Lưu ý"
-            android:textColor="@android:color/holo_red_dark"
-            android:textSize="30sp"></TextView>
-        <TextView
-            android:id="@+id/qc_note"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text=""
-            android:textSize="10sp"></TextView>
+            android:layout_marginTop="10dp"
+            android:orientation="vertical" >
 
-    </LinearLayout>
+            <ImageView
+                android:id="@+id/ad_detail_image"
+                android:layout_width="match_parent"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="10dp"
+                android:layout_marginBottom="10dp"
+                android:layout_height="200dp"
+                android:scaleType="centerCrop"
+                app:srcCompat="@drawable/radius"/>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:textStyle="bold"
+                android:layout_marginLeft="10dp"
+                android:text="Lưu ý"
+                android:textColor="@android:color/holo_red_dark"
+                android:textSize="30sp">
+
+            </TextView>
+            <TextView
+                android:id="@+id/qc_note"
+                android:layout_marginLeft="5dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text=""
+                android:textSize="10sp">
+
+            </TextView>
+        </LinearLayout>
+    </ScrollView>
 
 
 </LinearLayout>

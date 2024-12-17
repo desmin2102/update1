@@ -1,6 +1,7 @@
 package com.app.myapp.Adapter;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -43,7 +44,10 @@ public class ReviewAdapter extends RecyclerView.Adapter<ReviewAdapter.ReviewView
 
         holder.commentTime.setText(review.getReviewTime());
         holder.reviewContent.setText(review.getContent());
-            holder.userRating.setRating((float)review.getRating());
+        holder.userRating.setRating((float)review.getRating());
+
+        // Log dữ liệu để kiểm tra xem dữ liệu có được đặt đúng trong ViewHolder hay không
+        Log.d("ReviewAdapter", "Review: " + review.getContent() + ", Rating: " + review.getRating());
 
         // Đọc dữ liệu tên người dùng từ Firebase
         DatabaseReference userRef = FirebaseDatabase.getInstance().getReference("User").child(review.getUserId());
@@ -51,12 +55,14 @@ public class ReviewAdapter extends RecyclerView.Adapter<ReviewAdapter.ReviewView
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 String userName = dataSnapshot.child("name").getValue(String.class);
+                Log.d("ReviewAdapter", "UserName: " + userName); // Kiểm tra log tên người dùng
                 holder.userName.setText(userName);
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
                 // Xử lý lỗi
+                Log.e("ReviewAdapter", "onCancelled: " + databaseError.getMessage());
             }
         });
     }

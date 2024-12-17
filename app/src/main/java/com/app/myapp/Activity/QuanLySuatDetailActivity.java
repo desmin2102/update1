@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
@@ -41,7 +42,13 @@ public class QuanLySuatDetailActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_admin_quanlysuat_detail);
-
+        ImageView imBack = findViewById(R.id.imBack);
+        imBack.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish(); // Quay lại trang trước
+            }
+        });
         // Tham chiếu view
         spPhim = findViewById(R.id.spPhim);
         spPhong = findViewById(R.id.spPhong);

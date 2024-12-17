@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
+    android:background="@drawable/headerbkg"
     android:layout_height="match_parent">
 
     <LinearLayout
@@ -22,6 +23,7 @@
             android:id="@+id/screenTextView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:textColor="@color/white"
             android:gravity="center"
             android:text="Screen"
             android:textSize="18sp"
@@ -40,6 +42,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center"
+            android:textColor="@color/white"
             android:text="Giá vé: "
             android:textSize="16sp"
             android:padding="16dp"
@@ -81,6 +84,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="8dp"
                     android:text="Ghế trống"
+                    android:textColor="@color/white"
                     android:textSize="16sp"/>
             </LinearLayout>
 
@@ -100,6 +104,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="8dp"
+                    android:textColor="@color/white"
                     android:text="Ghế đã mua"
                     android:textSize="16sp"/>
             </LinearLayout>
@@ -119,6 +124,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:textColor="@color/white"
                     android:layout_marginStart="8dp"
                     android:text="Ghế đang chọn"
                     android:textSize="16sp"/>

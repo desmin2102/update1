@@ -35,17 +35,33 @@
                     android:id="@+id/textView7"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:layout_marginRight="20dp"
-                    android:gravity="center"
+                    android:layout_marginLeft="50dp"
+                    android:layout_marginRight="50dp"
+                    android:layout_marginTop="20dp"
                     android:text="Chính sách thành viên"
                     android:textColor="@color/white"
                     android:textSize="20dp" />
             </LinearLayout>
 
             <FrameLayout
-                android:id="@+id/fragment_container"
+                android:id="@+id/fragment_container_ChinhSach"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent" />
+                android:layout_height="660dp">
+
+                <ScrollView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+
+                    <TextView
+                        android:id="@+id/chinhSach"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="5dp"
+                        android:layout_marginTop="10dp"
+                        android:text="HELLO"/>
+                </ScrollView>
+
+            </FrameLayout>
 
         </LinearLayout>
     </ScrollView>

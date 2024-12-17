@@ -111,9 +111,13 @@ public class PaymentActivity extends AppCompatActivity {
             Log.d("PaymentActivity", "Button clicked");
             CreateOrder orderApi = new CreateOrder();
             try {
-                Log.d("PaymentActivity", "Total price: " + totalPrice);
-                JSONObject data = orderApi.createOrder(String.valueOf(totalPrice));
+                // Đảm bảo totalPrice là số nguyên
+                int totalPriceInt = (int) Double.parseDouble(totalPrice);
+                Log.d("PaymentActivity", "Total price (int): " + totalPriceInt);
+
+                JSONObject data = orderApi.createOrder(String.valueOf(totalPriceInt));
                 Log.d("PaymentActivity", "Order created: " + data.toString());
+
                 String code = data.getString("return_code");
                 Log.d("PaymentActivity", "Return code: " + code);
                 if (code.equals("1")) {
@@ -139,6 +143,10 @@ public class PaymentActivity extends AppCompatActivity {
                     });
                 } else {
                     Log.d("PaymentActivity", "Return code is not 1");
+                    String subReturnCode = data.getString("sub_return_code");
+                    String subReturnMessage = data.getString("sub_return_message");
+                    Log.d("PaymentActivity", "Sub return code: " + subReturnCode);
+                    Log.d("PaymentActivity", "Sub return message: " + subReturnMessage);
                 }
             } catch (Exception e) {
                 Log.e("PaymentActivity", "Exception: ", e);

@@ -1,5 +1,6 @@
 package com.app.myapp.Activity;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -240,7 +241,7 @@ public class MovieDetailsActivity extends AppCompatActivity {
                     movieGenreTextView.setText(genre);
                 }
                 if (rating != null) {
-                    String ratingText = Double.toString(rating);
+                    @SuppressLint("DefaultLocale") String ratingText = String.format("%.2f", rating);
                     movieRatingTextView.setText(ratingText);
                 }
                 if (summary != null) {

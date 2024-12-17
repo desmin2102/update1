@@ -54,7 +54,7 @@ dependencies {
     implementation (libs.gson)
     implementation (libs.logging.interceptor)
     implementation(fileTree(mapOf(
-        "dir" to "C:\\HK7-KHMT\\LTTBDD\\update123\\",
+        "dir" to "D:\\update1 - copy\\",
         "include" to listOf("*.aar", "*.jar"),
         "exclude" to listOf("")
     )))
