@@ -17,8 +17,12 @@ import androidx.fragment.app.DialogFragment;
 
 import com.app.myapp.Class.Review;
 import com.app.myapp.R;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
 
 import java.text.SimpleDateFormat;
 import java.util.Locale;
@@ -33,6 +37,7 @@ public class ReviewDialogFragment extends DialogFragment {
 
     private String movieId;
     private String userId;
+    private Review existingReview;
 
     public ReviewDialogFragment(String movieId, String userId) {
         this.movieId = movieId;
@@ -54,9 +59,39 @@ public class ReviewDialogFragment extends DialogFragment {
         cancelButton.setOnClickListener(v -> dismiss());
         confirmButton.setOnClickListener(v -> submitReview());
 
+        // Kiểm tra xem người dùng đã có bình luận trước đó chưa
+        checkIfUserHasReviewed();
+
         builder.setView(view);
         return builder.create();
     }
+
+    private void checkIfUserHasReviewed() {
+        DatabaseReference reviewRef = FirebaseDatabase.getInstance().getReference("Review");
+        Query query = reviewRef.orderByChild("userId").equalTo(userId);
+        query.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                    Review review = snapshot.getValue(Review.class);
+                    if (review != null && review.getMovieId().equals(movieId)) {
+                        existingReview = review;
+                        // Cập nhật giao diện với bình luận hiện tại
+                        ratingBar.setRating((float) existingReview.getRating());
+                        reviewEditText.setText(existingReview.getContent());
+                        break;
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                // Xử lý lỗi nếu cần
+            }
+        });
+    }
+
+
 
     private void submitReview() {
         float rating = ratingBar.getRating();
@@ -67,18 +102,20 @@ public class ReviewDialogFragment extends DialogFragment {
             return;
         }
 
-        DatabaseReference reviewRef = FirebaseDatabase.getInstance().getReference("Review").push();
-        String reviewId = reviewRef.getKey();
+        DatabaseReference reviewRef = FirebaseDatabase.getInstance().getReference("Review");
+        String reviewId = existingReview != null ? existingReview.getReviewId() : reviewRef.push().getKey();
         String reviewTime = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(new Date());
         Review review = new Review(reviewId, movieId, userId, reviewText, reviewTime, rating);
 
-        reviewRef.setValue(review).addOnCompleteListener(task -> {
+        reviewRef.child(reviewId).setValue(review).addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
                 Toast.makeText(getActivity(), "Review submitted successfully", Toast.LENGTH_SHORT).show();
+                ((MovieDetailsActivity) getActivity()).updateMovieRating(movieId); // Cập nhật rating của phim
                 dismiss();
             } else {
                 Toast.makeText(getActivity(), "Failed to submit review", Toast.LENGTH_SHORT).show();
             }
         });
     }
+
 }

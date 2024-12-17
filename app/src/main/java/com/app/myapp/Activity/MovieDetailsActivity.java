@@ -6,9 +6,12 @@ import android.os.Bundle;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 import android.widget.VideoView;
 import android.widget.MediaController;
 import androidx.activity.OnBackPressedCallback;
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.FragmentManager;
@@ -28,7 +31,6 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -48,6 +50,7 @@ public class MovieDetailsActivity extends AppCompatActivity {
     private List<Review> reviewList;
     private Button rateReviewButton; // Nút Rate and Review
     private FirebaseUser currentUser;
+    private boolean hasWatchedMovie = false; // Trạng thái xem phim
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -97,6 +100,7 @@ public class MovieDetailsActivity extends AppCompatActivity {
         if (movieId != null) {
             fetchMovieDetailsFromDatabase(movieId);
             fetchReviewsFromDatabase(movieId);
+            checkIfUserHasWatchedMovie(movieId, currentUser.getUid());
         } else {
             movieTitleTextView.setText("Không tìm thấy ID phim.");
         }
@@ -112,11 +116,92 @@ public class MovieDetailsActivity extends AppCompatActivity {
 
         // Xử lý sự kiện khi nhấn nút Rate and Review
         rateReviewButton.setOnClickListener(v -> {
-            FragmentManager fragmentManager = getSupportFragmentManager();
-            ReviewDialogFragment reviewDialog = new ReviewDialogFragment(movieId, currentUser.getUid());
-            reviewDialog.show(fragmentManager, "reviewDialog");
+            if (hasWatchedMovie) {
+                FragmentManager fragmentManager = getSupportFragmentManager();
+                ReviewDialogFragment reviewDialog = new ReviewDialogFragment(movieId, currentUser.getUid());
+                reviewDialog.show(fragmentManager, "reviewDialog");
+            } else {
+                showWatchedMovieRequiredMessage();
+            }
         });
     }
+
+    private void checkIfUserHasWatchedMovie(String movieId, String userId) {
+        DatabaseReference ticketsRef = FirebaseDatabase.getInstance().getReference("Ticket");
+        Query query = ticketsRef.orderByChild("userId").equalTo(userId);
+        query.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                    String sessionId = snapshot.child("sessionId").getValue(String.class);
+                    DatabaseReference sessionRef = FirebaseDatabase.getInstance().getReference("MovieSession").child(sessionId);
+                    sessionRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot sessionSnapshot) {
+                            String movieIdFromSession = sessionSnapshot.child("movieId").getValue(String.class);
+                            if (movieId.equals(movieIdFromSession)) {
+                                hasWatchedMovie = true;
+                            }
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError databaseError) {
+                            // Xử lý lỗi
+                        }
+                    });
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                // Xử lý lỗi
+            }
+        });
+    }
+
+    private void showWatchedMovieRequiredMessage() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Thông báo")
+                .setMessage("Bạn cần xem phim này trước khi đánh giá.")
+                .setPositiveButton("OK", null)
+                .show();
+    }
+
+    void updateMovieRating(String movieId) {
+        DatabaseReference reviewsRef = FirebaseDatabase.getInstance().getReference("Review");
+        Query query = reviewsRef.orderByChild("movieId").equalTo(movieId);
+        query.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                double totalRating = 0;
+                int count = 0;
+                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                    Review review = snapshot.getValue(Review.class);
+                    if (review != null) {
+                        totalRating += review.getRating();
+                        count++;
+                    }
+                }
+                if (count > 0) {
+                    double averageRating = totalRating / count;
+                    DatabaseReference movieRef = FirebaseDatabase.getInstance().getReference("Movie").child(movieId);
+                    movieRef.child("rating").setValue(averageRating).addOnCompleteListener(task -> {
+                        if (task.isSuccessful()) {
+                            Toast.makeText(MovieDetailsActivity.this, "Movie rating updated", Toast.LENGTH_SHORT).show();
+                        } else {
+                            Toast.makeText(MovieDetailsActivity.this, "Failed to update movie rating", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                // Xử lý lỗi nếu cần
+            }
+        });
+    }
+
 
     private void fetchMovieDetailsFromDatabase(String movieId) {
         DatabaseReference databaseReferenceMovie = FirebaseDatabase.getInstance().getReference("Movie").child(movieId);
