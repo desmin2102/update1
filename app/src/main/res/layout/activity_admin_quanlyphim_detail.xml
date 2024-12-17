@@ -122,7 +122,7 @@
                 android:lines="1" />
 
             <EditText
-                android:id="@+id/edTheLoai"
+                android:id="@+id/edGiaVe"
                 android:layout_width="wrap_content"
                 android:layout_height="40dp"
                 android:layout_marginLeft="10dp"
@@ -142,7 +142,7 @@
 
             <EditText
                 android:id="@+id/edAnhphim"
-                android:layout_width="161dp"
+                android:layout_width="170dp"
                 android:layout_height="40dp"
                 android:layout_marginLeft="10dp"
                 android:layout_marginRight="10dp"
@@ -154,9 +154,9 @@
 
             <EditText
                 android:id="@+id/edTrailer"
-                android:layout_width="161dp"
+                android:layout_width="168dp"
                 android:layout_height="40dp"
-                android:layout_marginLeft="20dp"
+                android:layout_marginLeft="10dp"
                 android:layout_marginRight="10dp"
                 android:layout_weight="1"
                 android:background="@drawable/edit_text_rounded"
@@ -184,9 +184,9 @@
                 android:gravity="top|start"
                 android:hint="Mô tả"
                 android:inputType="textMultiLine"
-                android:singleLine="false"
                 android:scrollbars="vertical"
-                android:scrollHorizontally="false" />
+                android:scrollHorizontally="false"
+                android:singleLine="false" />
         </LinearLayout>
 
         <LinearLayout

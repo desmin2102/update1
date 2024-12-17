@@ -72,13 +72,12 @@
             android:hint="Tìm kiếm quảng cáo..."
             android:padding="12dp" />
 
-        <!-- RecyclerView hiển thị danh sách phim -->
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/rvMovieList"
+        <ListView
+            android:id="@+id/lvAd"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:dividerHeight="8dp"
-            android:scrollbars="vertical" />
+            android:layout_height="match_parent" />
+
+        <!-- RecyclerView hiển thị danh sách phim -->
         <!-- Container cho Fragment -->
 
     </LinearLayout>

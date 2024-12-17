@@ -1,6 +1,7 @@
 package com.app.myapp.Activity;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageView;
@@ -9,7 +10,6 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.app.myapp.R;
 import com.google.firebase.auth.FirebaseAuth;
-import android.content.SharedPreferences;
 
 public class AdminMainActivity extends AppCompatActivity {
     @Override
@@ -27,6 +27,8 @@ public class AdminMainActivity extends AppCompatActivity {
         ImageView imQuanLySuat = findViewById(R.id.imQuanLySuat);
         ImageView imThongKe = findViewById(R.id.imThongKe);
         ImageView imDangXuat = findViewById(R.id.imDangXuat); // Kết nối ImageView
+
+
 
 
         // Thêm sự kiện click
@@ -107,8 +109,8 @@ public class AdminMainActivity extends AppCompatActivity {
                 editor.clear();
                 editor.apply();
 
-                // Quay về màn hình login (Login)
-                Intent intent = new Intent(AdminMainActivity.this, Login.class);
+                // Quay về màn hình chính (MainActivity)
+                Intent intent = new Intent(AdminMainActivity.this, MainActivity.class);
                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK); // Đảm bảo thoát hoàn toàn khỏi AdminMainActivity
                 startActivity(intent);
                 finish(); // Kết thúc AdminMainActivity để tránh quay lại bằng nút Back

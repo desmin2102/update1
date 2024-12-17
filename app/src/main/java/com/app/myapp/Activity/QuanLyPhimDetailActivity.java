@@ -19,6 +19,8 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import java.util.UUID;
+
 public class QuanLyPhimDetailActivity extends AppCompatActivity {
 
     @Override
@@ -39,7 +41,7 @@ public class QuanLyPhimDetailActivity extends AppCompatActivity {
         EditText edPhim = findViewById(R.id.edPhim);
         EditText edThoiLuong = findViewById(R.id.edThoiLuong);
         EditText edKhoiChieu = findViewById(R.id.edKhoiChieu);
-        EditText edTheLoai = findViewById(R.id.edTheLoai);
+        EditText edTheLoai = findViewById(R.id.edGiaVe);
         EditText edAnhphim = findViewById(R.id.edAnhphim);
         EditText edTrailer = findViewById(R.id.edTrailer);
         EditText edMoTa = findViewById(R.id.edMoTa);
@@ -54,6 +56,7 @@ public class QuanLyPhimDetailActivity extends AppCompatActivity {
 
         // Kiểm tra nếu movieId không null, truy xuất dữ liệu từ Firebase
         if (movieId != null) {
+            btThemAdmin.setVisibility(View.GONE);
             DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference("Movie").child(movieId);
             databaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
@@ -87,6 +90,8 @@ public class QuanLyPhimDetailActivity extends AppCompatActivity {
             });
         } else {
             Toast.makeText(this, "Thêm phim", Toast.LENGTH_SHORT).show();
+            btSuaAdmin.setVisibility(View.GONE); // Ẩn nút "Sửa" khi thêm
+            btXoaAdmin.setVisibility(View.GONE); // Ẩn nút "Xóa" khi thêm
         }
 
         btThemAdmin.setOnClickListener(new View.OnClickListener() {
@@ -107,26 +112,25 @@ public class QuanLyPhimDetailActivity extends AppCompatActivity {
                     return;
                 }
 
-                // Tạo id cho phim mới
-                String movieId = FirebaseDatabase.getInstance().getReference("Movie").push().getKey();
+                // Tạo id cho phim mới bằng UUID
+                String movieId = UUID.randomUUID().toString();
 
                 // Tạo đối tượng Movie
                 Movie movie = new Movie(movieId, title, duration, movieDateStart, genre, 0, summary, trailerUrl, imageUrl);
 
                 // Thêm vào Firebase
                 DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference("Movie");
-                if (movieId != null) {
-                    databaseReference.child(movieId).setValue(movie).addOnCompleteListener(task -> {
-                        if (task.isSuccessful()) {
-                            Toast.makeText(QuanLyPhimDetailActivity.this, "Thêm phim thành công!", Toast.LENGTH_SHORT).show();
-                            finish(); // Đóng Activity sau khi thêm thành công
-                        } else {
-                            Toast.makeText(QuanLyPhimDetailActivity.this, "Lỗi khi thêm phim!", Toast.LENGTH_SHORT).show();
-                        }
-                    });
-                }
+                databaseReference.child(movieId).setValue(movie).addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        Toast.makeText(QuanLyPhimDetailActivity.this, "Thêm phim thành công!", Toast.LENGTH_SHORT).show();
+                        finish(); // Đóng Activity sau khi thêm thành công
+                    } else {
+                        Toast.makeText(QuanLyPhimDetailActivity.this, "Lỗi khi thêm phim!", Toast.LENGTH_SHORT).show();
+                    }
+                });
             }
         });
+
 
 
         btXoaAdmin.setOnClickListener(new View.OnClickListener() {

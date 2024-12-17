@@ -43,11 +43,16 @@
         <activity
             android:name=".Activity.QuanLyBacThanhVienActivity"
             android:exported="false" />
+        <activity
+            android:name=".Activity.QuanLyBacThanhVienDetailActivity"
+            android:exported="false" />
 
         <activity
             android:name=".Activity.QuanLyNguoiDungActivity"
             android:exported="false" />
-
+        <activity
+            android:name=".Activity.QuanLyNguoiDungDetailActivity"
+            android:exported="false" />
         <activity
             android:name=".Activity.QuanLyPhimActivity"
             android:exported="false" />
@@ -59,7 +64,9 @@
         <activity
             android:name=".Activity.QuanLyPhongActivity"
             android:exported="false" />
-
+        <activity
+            android:name=".Activity.QuanLyPhongDetailActivity"
+            android:exported="false" />
         <activity
             android:name=".Activity.QuanLyQuangCaoActivity"
             android:exported="false" />
@@ -71,9 +78,15 @@
         <activity
             android:name=".Activity.QuanLyRapActivity"
             android:exported="false" />
-
+        <activity
+            android:name=".Activity.QuanLyRapDetailActivity"
+            android:exported="false" />
         <activity
             android:name=".Activity.QuanLySuatActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".Activity.QuanLySuatDetailActivity"
             android:exported="false" />
 
         <activity

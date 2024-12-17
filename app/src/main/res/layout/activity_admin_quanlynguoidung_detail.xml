@@ -49,7 +49,7 @@
                 android:layout_marginBottom="10dp"
                 android:background="@android:color/holo_purple"
                 android:padding="5dp"
-                android:text="CHI TIẾT QUẢNG CÁO    "
+                android:text="CHI TIẾT TÀI KHOẢN    "
                 android:textAlignment="center"
                 android:textColor="@color/white"
                 android:textSize="30dp" />
@@ -57,51 +57,102 @@
         </LinearLayout>
 
         <ImageView
-            android:id="@+id/imageView2"
+            android:id="@+id/imageView7"
             android:layout_width="match_parent"
-            android:layout_height="120dp"
-            android:layout_marginBottom="50dp"
-            app:srcCompat="@drawable/adv" />
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="20dp"
+            app:srcCompat="@drawable/taikhoan" />
 
-        <EditText
-            android:id="@+id/editName"
-            android:layout_width="match_parent"
-            android:layout_height="50dp"
-            android:layout_marginLeft="10dp"
-            android:layout_marginRight="10dp"
-            android:layout_marginBottom="50dp"
-            android:ems="10"
-            android:hint="Tên quảng cáo..."
-            android:inputType="text"
-            android:background="@drawable/edit_text_rounded"/>
-
-        <EditText
-            android:id="@+id/editAnhquangcao"
-            android:layout_width="match_parent"
-            android:layout_height="50dp"
-            android:layout_marginLeft="10dp"
-            android:layout_marginRight="10dp"
-            android:layout_marginBottom="160dp"
-            android:ems="10"
-            android:hint="Ảnh quảng cáo"
-            android:inputType="text"
-            android:background="@drawable/edit_text_rounded"/>
-
-        <EditText
-            android:id="@+id/editNote"
-            android:layout_width="match_parent"
-            android:layout_height="50dp"
-            android:layout_marginLeft="10dp"
-            android:layout_marginRight="10dp"
-            android:layout_marginBottom="160dp"
-            android:ems="10"
-            android:hint="Nội dung quảng cao"
-            android:inputType="text"
-            android:background="@drawable/edit_text_rounded"/>
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="50dp"
             android:orientation="horizontal">
+
+            <EditText
+                android:id="@+id/editTenBac"
+                android:layout_width="wrap_content"
+                android:layout_height="40dp"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="10dp"
+                android:layout_weight="1"
+                android:background="@drawable/edit_text_rounded"
+                android:ems="10"
+                android:hint="Tên User..."
+                android:inputType="text" />
+
+            <EditText
+                android:id="@+id/editGiamGia"
+                android:layout_width="wrap_content"
+                android:layout_height="40dp"
+                android:layout_marginRight="10dp"
+                android:layout_weight="1"
+                android:background="@drawable/edit_text_rounded"
+                android:ems="10"
+                android:hint="Tên tài khoản..."
+                android:inputType="text" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="230dp"
+            android:orientation="horizontal">
+
+            <EditText
+                android:id="@+id/editDiem"
+                android:layout_width="387dp"
+                android:layout_height="40dp"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="10dp"
+                android:layout_weight="1"
+                android:background="@drawable/edit_text_rounded"
+                android:ems="10"
+                android:hint="Mật khẩu..."
+                android:inputType="text" />
+
+            <Spinner
+                android:id="@+id/spinnerUserRole"
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:layout_weight="1" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="50dp"
+            android:orientation="horizontal">
+            <EditText
+                android:id="@+id/editName"
+                android:layout_width="wrap_content"
+                android:layout_height="40dp"
+                android:layout_marginRight="10dp"
+                android:layout_weight="1"
+                android:background="@drawable/edit_text_rounded"
+                android:ems="10"
+                android:hint="Name"
+                android:inputType="text" />
+            <EditText
+                android:id="@+id/editphone"
+                android:layout_width="wrap_content"
+                android:layout_height="40dp"
+                android:layout_marginRight="10dp"
+                android:layout_weight="1"
+                android:background="@drawable/edit_text_rounded"
+                android:ems="10"
+                android:hint="phone"
+                android:inputType="text" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/buttonLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_gravity="bottom"
+            android:layout_marginBottom="16dp">
 
             <Button
                 android:id="@+id/btThemAdmin"
