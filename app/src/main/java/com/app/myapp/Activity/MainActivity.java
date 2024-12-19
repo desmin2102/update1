@@ -23,7 +23,6 @@ import androidx.viewpager2.widget.CompositePageTransformer;
 import androidx.viewpager2.widget.MarginPageTransformer;
 import androidx.viewpager2.widget.ViewPager2;
 
-import com.app.myapp.Activity.fragment.ThayDoiThongTin;
 import com.app.myapp.Adapter.AdAdapter;
 import com.app.myapp.Adapter.MovieAdapter;
 import com.app.myapp.Class.Ad;
@@ -418,7 +417,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             startActivity(new Intent(MainActivity.this,VeCuaToi.class));
         }else
         if (id == R.id.nav_changeTT) {
-            startActivity(new Intent(MainActivity.this, ThayDoiThongTin.class));
+            startActivity(new Intent(MainActivity.this,ThayDoiThongTin.class));
         }else
         if (id == R.id.nav_point) {
             startActivity(new Intent(MainActivity.this, ChinhSach.class));

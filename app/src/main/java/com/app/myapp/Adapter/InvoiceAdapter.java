@@ -10,7 +10,6 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
-import androidx.viewpager2.widget.ViewPager2;
 
 import com.app.myapp.Activity.MovieDetailsActivity;
 import com.app.myapp.Class.Invoice;
@@ -48,20 +47,18 @@ public class InvoiceAdapter extends RecyclerView.Adapter<InvoiceAdapter.MovieVie
 
     @Override
     public void onBindViewHolder(@NonNull MovieViewHolder holder, int position) {
-        holder.setImage(movieList.get(position));
         Movie movie = movieList.get(position);
         Invoice invoice= movieInvoicesList.get(position);
+        holder.txtMaVe.setText(invoice.getInvoiceId());
+        holder.setImage(movieList.get(position));
         holder.tvTitle.setText(movie.getTitle());
+
+        holder.tvDuration.setText("Thời lượng: " + movie.getDuration());
+        holder.tvShowTime.setText("Khởi chiếu: " + movie.getMovieDateStart());
         //tùy chỉnh hiển thị giá
         NumberFormat numberFormat = NumberFormat.getNumberInstance(Locale.US);
         String formattedPrice = numberFormat.format(invoice.getTotalPrice());
         holder.txtPrice.setText(formattedPrice + " đ");
-
-        holder.txtMaVe.setText(invoice.getInvoiceId());
-        holder.tvDuration.setText("Thời lượng: " + movie.getDuration());
-        holder.tvShowTime.setText("Khởi chiếu: " + movie.getMovieDateStart());
-        //holder.tvGenre.setText("Thể loại: " + movie.getGenre());
-        // Bạn có thể thêm các thiết lập khác cho ImageView, Button v.v.
     }
 
     @Override

@@ -6,11 +6,11 @@ public class Ad{
     private String note;
     private String mediaurl;
     private String adName;
-    public Ad()
-    {
+
+    public Ad() {
 
     }
-    public Ad(String id, String note, String mediaurl,String adName) {
+    public Ad(String id, String note, String mediaurl,String adName ) {
         this.id = id;
         this.note = note;
         this.mediaurl = mediaurl;
@@ -48,4 +48,5 @@ public class Ad{
     public void setMediaurl(String mediaurl) {
         this.mediaurl = mediaurl;
     }
+
 }

@@ -10,7 +10,7 @@
         android:id="@+id/seatTextView"
         android:layout_width="50dp"
         android:layout_height="50dp"
-        android:background="@drawable/seat_background"
+        android:background="@drawable/tron_mau"
         android:gravity="center"
         android:textColor="@android:color/black"
         android:textSize="16sp"/>

@@ -29,17 +29,21 @@
         android:gravity="end"
         android:layout_marginTop="16dp">
 
-        <Button
+        <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/cancelButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Cancel"
+            android:textColor="@color/white"
+            android:background="@drawable/button"
             android:layout_marginRight="16dp"/>
 
-        <Button
+        <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/confirmButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:background="@drawable/button"
+            android:textColor="@color/white"
             android:text="Confirm"/>
     </LinearLayout>
 </LinearLayout>

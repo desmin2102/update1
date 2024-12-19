@@ -1,10 +1,11 @@
-package com.app.myapp.Activity.fragment;
+package com.app.myapp.Activity;
 
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -12,7 +13,6 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
-import com.app.myapp.Class.Review;
 import com.app.myapp.Class.User;
 import com.app.myapp.R;
 import com.google.firebase.auth.FirebaseAuth;
@@ -27,7 +27,6 @@ public class ThayDoiThongTin extends AppCompatActivity {
     private Button btnCapNhat;
     private EditText editTextPhone,editText_Ten;
     private FirebaseAuth mAuth;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -38,13 +37,16 @@ public class ThayDoiThongTin extends AppCompatActivity {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
+        // Nút quay lại
+        ImageView imBack = findViewById(R.id.imBack);
+        imBack.setOnClickListener(v -> finish());
 
         btnCapNhat=findViewById(R.id.btnCapNhat);
         editText_Ten=findViewById(R.id.editText_Ten);
         editTextPhone=findViewById(R.id.editTextPhone);
         // Nút quay lại
-        ImageView imBack = findViewById(R.id.imBack);
-        imBack.setOnClickListener(v -> finish());
+        ImageView imback = findViewById(R.id.imBack);
+        imback.setOnClickListener(v -> finish());
         //HIỆN thông tin
         setUserInformation();
 
@@ -59,8 +61,11 @@ public class ThayDoiThongTin extends AppCompatActivity {
                 DatabaseReference databaseReferenceReviews = FirebaseDatabase.getInstance().getReference("User");
                 databaseReferenceReviews.child(userId).child("name").setValue(name);
                 databaseReferenceReviews.child(userId).child("phone").setValue(phone);
+                Toast.makeText(ThayDoiThongTin.this,"Cập Nhật Thành Công",Toast.LENGTH_SHORT).show();
             }
         });
+
+
     }
     private  void setUserInformation(){
         FirebaseUser user= FirebaseAuth.getInstance().getCurrentUser();
@@ -68,7 +73,6 @@ public class ThayDoiThongTin extends AppCompatActivity {
             return;
         }
         DatabaseReference databaseReferenceReviews = FirebaseDatabase.getInstance().getReference("User");
-        //Query query = databaseReferenceReviews.orderByChild("movieId").equalTo(movieId);
         databaseReferenceReviews.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -80,6 +84,7 @@ public class ThayDoiThongTin extends AppCompatActivity {
                     if(userId.equals(user1.getId())) {
                         editText_Ten.setText(user1.getName());
                         editTextPhone.setText(user1.getPhone());
+                        return;
                     }
                 }
             }
@@ -89,4 +94,5 @@ public class ThayDoiThongTin extends AppCompatActivity {
             }
         });
     }
+
 }

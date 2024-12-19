@@ -33,10 +33,14 @@ public class AdDetailsActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_ad_details);
 
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-        Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setDisplayShowHomeEnabled(true);
+        //Toolbar toolbar = findViewById(R.id.toolbar);
+        //setSupportActionBar(toolbar);
+        //Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);//setDisplayHomeAsUpEnabled(true): Hiển thị nút "up" (mũi tên quay lại)
+        //getSupportActionBar().setDisplayShowHomeEnabled(true);
+
+        // Nút quay lại
+        ImageView imBack = findViewById(R.id.imBack);
+        imBack.setOnClickListener(v -> finish());
 
         ImageView adImageView = findViewById(R.id.ad_detail_image);
         qcNoteTextView = findViewById(R.id.qc_note);

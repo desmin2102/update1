@@ -1,37 +1,67 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:orientation="vertical">
+    tools:context=".Activity.AdDetailsActivity">
 
-    <androidx.appcompat.widget.Toolbar
-        android:id="@+id/toolbar"
+    <LinearLayout
+        android:id="@+id/linearLayout2"
         android:layout_width="match_parent"
-        android:layout_height="?attr/actionBarSize"
+        android:layout_height="60dp"
         android:background="@drawable/thanh_tieu_de"
-        android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
-        android:popupTheme="@style/ThemeOverlay.AppCompat.Light"/>
+        android:orientation="horizontal"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <ImageView
+            android:id="@+id/imBack"
+            android:layout_width="60dp"
+            android:layout_height="40dp"
+            android:layout_marginTop="10dp"
+            app:srcCompat="@drawable/ic_arrowback_white_admin" />
+
+        <TextView
+            android:id="@+id/textView9"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="80dp"
+            android:layout_marginTop="13dp"
+            android:text="Quảng cáo"
+            android:textColor="@color/white"
+            android:textSize="23dp"
+            android:textStyle="bold" />
+
+    </LinearLayout>
 
     <ScrollView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_width="412dp"
+        android:layout_height="671dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/linearLayout2"
+        app:layout_constraintVertical_bias="0.0">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:orientation="vertical" >
-
+            android:padding="10dp"
+            android:orientation="vertical">
             <ImageView
                 android:id="@+id/ad_detail_image"
                 android:layout_width="match_parent"
                 android:layout_marginLeft="10dp"
                 android:layout_marginRight="10dp"
+                android:layout_marginTop="30dp"
                 android:layout_marginBottom="10dp"
                 android:layout_height="200dp"
                 android:scaleType="centerCrop"
-                app:srcCompat="@drawable/radius"/>
+                app:srcCompat="@drawable/button_chon"/>
 
             <TextView
                 android:layout_width="match_parent"
@@ -41,20 +71,15 @@
                 android:layout_marginLeft="10dp"
                 android:text="Lưu ý"
                 android:textColor="@android:color/holo_red_dark"
-                android:textSize="30sp">
-
-            </TextView>
+                android:textSize="25sp"/>
             <TextView
                 android:id="@+id/qc_note"
                 android:layout_marginLeft="5dp"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text=""
-                android:textSize="10sp">
+                android:textSize="20sp"/>
 
-            </TextView>
         </LinearLayout>
     </ScrollView>
-
-
-</LinearLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

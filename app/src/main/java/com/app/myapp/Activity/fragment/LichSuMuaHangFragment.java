@@ -76,6 +76,7 @@ public class LichSuMuaHangFragment extends Fragment {
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
     }
+
     private FirebaseAuth mAuth;
     private RecyclerView recyclerView_LichSuMuaHang;
     private InvoiceAdapter mvAdapter;
@@ -89,7 +90,6 @@ public class LichSuMuaHangFragment extends Fragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_lich_su_mua_hang, container, false);
 
-        // Tìm RecyclerView bằng View đã được inflate
         recyclerView_LichSuMuaHang = view.findViewById(R.id.recyclerView_Lich_Su_Mua);
         recyclerView_LichSuMuaHang.setLayoutManager(new LinearLayoutManager(getContext()));
         mvAdapter = new InvoiceAdapter(listMovie_lichSuMua,listInvoice);
@@ -106,11 +106,15 @@ public class LichSuMuaHangFragment extends Fragment {
                 mAuth = FirebaseAuth.getInstance();
                 FirebaseUser currentUser = mAuth.getCurrentUser();
                 String userId = currentUser.getUid();
+                Log.e("FirebaseError", "Failed to load data: " +userId);
                 listInvoice.clear();
                 for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
                     Invoice invoice = snapshot.getValue(Invoice.class);
+                    //Log.e("FirebaseError", "Failed to load data: " + invoice.getInvoiceId());
                     if (userId.equals(invoice.getUserId())) {
+                        Log.e("FirebaseError", "Failed to load data: da vao duoc");
                         listInvoice.add(invoice);
+                        Log.e("FirebaseError", "Failed to load data:"+ listInvoice);
                     }
                 }
             }
