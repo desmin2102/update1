@@ -202,7 +202,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     Movie currentMovie = listMovie.get(viewPagermv.getCurrentItem());
 
                     // Mở LocationActivity khi nhấn nút Booking
-                    Intent intent = new Intent(MainActivity.this, BookingActivity.class);
+                    Intent intent = new Intent(MainActivity.this, ScheduleActivity.class);
                     intent.putExtra("movieId", currentMovie.getId()); // Truyền ID của bộ phim
                     startActivity(intent);
                 } else {

@@ -21,6 +21,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -33,15 +34,15 @@ public class ScheduleActivity extends AppCompatActivity {
     private Toolbar toolbar;
     private Spinner spinnerLocation;
     private String selectedLocationId;
-    private Map<String, Room> roomMap;
+    private String movieId; // Thêm biến movieId
+    private Map<String, Room> roomMap = new HashMap<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_schedule);
 
-        // Loại bỏ việc nhận movieId từ Intent
-        // movieId = getIntent().getStringExtra("movieId"); // Không còn cần thiết
+        movieId = getIntent().getStringExtra("movieId"); // Nhận movieId từ Intent
 
         toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -115,8 +116,8 @@ public class ScheduleActivity extends AppCompatActivity {
     }
 
     private void updateDayAdapter(String locationId) {
-        // Không truyền movieId vào nữa
-        dayAdapter = new DayAdapter(dayList, this, movieSessionRecyclerView, locationId);
+        // Truyền locationId và movieId vào DayAdapter
+        dayAdapter = new DayAdapter(dayList, this, movieSessionRecyclerView, locationId, movieId);
         recyclerView.setAdapter(dayAdapter);
         dayAdapter.selectFirstDay(); // Mặc định chọn ngày đầu tiên
     }
@@ -143,3 +144,4 @@ public class ScheduleActivity extends AppCompatActivity {
         return days;
     }
 }
+
