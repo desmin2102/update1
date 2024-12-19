@@ -6,6 +6,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -35,7 +36,6 @@ public class QuanLyPhongActivity extends AppCompatActivity {
     private EditText etSearch;
     private Handler handler; // Để tạo độ trễ khi tìm kiếm
     private Runnable searchRunnable;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -97,10 +97,25 @@ public class QuanLyPhongActivity extends AppCompatActivity {
         // Sự kiện click cho ListView
         lvRoom.setOnItemClickListener((adapterView, view, position, id) -> {
             String selectedRoomId = roomIds.get(position); // Lấy roomId từ danh sách
-            Intent intent = new Intent(QuanLyPhongActivity.this, QuanLyPhongDetailActivity.class);
-            intent.putExtra("roomId", selectedRoomId); // Truyền roomId sang Activity chi tiết
-            startActivity(intent);
+
+            // Gọi phương thức để lấy locationId tương ứng
+            getLocationIdForRoom(selectedRoomId, locationId -> {
+                Log.d("QuanLyPhongActivity", "roomId: " + selectedRoomId + ", locationId: " + locationId);
+
+                if (locationId != null) {
+                    Log.d("QuanLyPhongActivity", "roomId: " + selectedRoomId + ", locationId: " + locationId);
+
+                    // Chỉ thực hiện nếu locationId được trả về
+                    Intent intent = new Intent(QuanLyPhongActivity.this, QuanLyPhongDetailActivity.class);
+                    intent.putExtra("roomId", selectedRoomId); // Truyền roomId sang Activity chi tiết
+                    intent.putExtra("locationId", locationId); // Truyền locationId sang Activity chi tiết
+                    startActivity(intent);
+                } else {
+                    Toast.makeText(QuanLyPhongActivity.this, "Không tìm thấy locationId", Toast.LENGTH_SHORT).show();
+                }
+            });
         });
+
     }
 
     private void fetchRoomData() {
@@ -109,14 +124,30 @@ public class QuanLyPhongActivity extends AppCompatActivity {
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 roomTitles.clear();
                 roomIds.clear();
+
                 for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
                     String roomName = dataSnapshot.child("roomName").getValue(String.class);
                     String roomId = dataSnapshot.getKey();
+                    String locationId = dataSnapshot.child("locationId").getValue(String.class);
 
-                    roomTitles.add(roomName);
-                    roomIds.add(roomId);
+                    if (roomName != null && locationId != null) {
+                        DatabaseReference locationRef = FirebaseDatabase.getInstance()
+                                .getReference("Location")
+                                .child(locationId);
+
+                        locationRef.child("address").get().addOnCompleteListener(task -> {
+                            if (task.isSuccessful()) {
+                                String address = task.getResult().getValue(String.class);
+                                String displayText = roomName + " | " + (address != null ? address : "Unknown Address");
+
+                                roomTitles.add(displayText); // Thêm vào danh sách hiển thị
+                                roomIds.add(roomId); // Lưu lại roomId tương ứng
+
+                                roomAdapter.notifyDataSetChanged(); // Cập nhật ListView
+                            }
+                        });
+                    }
                 }
-                roomAdapter.notifyDataSetChanged();
             }
 
             @Override
@@ -125,6 +156,7 @@ public class QuanLyPhongActivity extends AppCompatActivity {
             }
         });
     }
+
 
     private void searchRooms(String query) {
         if (query.isEmpty()) {
@@ -160,5 +192,24 @@ public class QuanLyPhongActivity extends AppCompatActivity {
                 Toast.makeText(QuanLyPhongActivity.this, "Lỗi khi tìm kiếm", Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    // Phương thức bất đồng bộ để lấy locationId từ Firebase
+    private void getLocationIdForRoom(String roomId, LocationIdCallback callback) {
+        DatabaseReference roomRef = FirebaseDatabase.getInstance().getReference("Room").child(roomId);
+
+        roomRef.child("locationId").get().addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                String locationId = task.getResult().getValue(String.class);
+                callback.onLocationIdRetrieved(locationId);
+            } else {
+                Toast.makeText(QuanLyPhongActivity.this, "Lỗi khi lấy locationId", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    // Interface callback để nhận locationId
+    interface LocationIdCallback {
+        void onLocationIdRetrieved(String locationId);
     }
 }

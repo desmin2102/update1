@@ -18,9 +18,10 @@ public class MovieSession {
         // Constructor mặc định cần cho Firebase
     }
 
-    public MovieSession(String sessionId, String seessionName,String movieId, String roomId,String startDay, String startTime, String endTime, String price) {
+    public MovieSession(String sessionId, String sessionName,String movieId, String roomId,String startDay, String startTime, String endTime, String price) {
         this.sessionId = sessionId;
         this.movieId = movieId;
+        this.sessionName=sessionName;
         this.roomId = roomId;
         this.startDay=startDay;
         this.startTime = startTime;
@@ -32,10 +33,10 @@ public class MovieSession {
  {
      return startDay;
  }
- public void setStartDay()
- {
-     this.startDay=startDay;
- }
+    public void setStartDay(String startDay) {
+        this.startDay = startDay;
+    }
+
     public String getSessionName() {
         return sessionName;
     }
@@ -43,7 +44,8 @@ public class MovieSession {
     public void setSessionName(String sessionName) {
         this.sessionName = sessionName;
     }
-// Getters và Setters
+
+    // Getters và Setters
 
     public String getSessionId() {
         return sessionId;
@@ -102,6 +104,9 @@ public class MovieSession {
     }
 
     private int getTotalSeatsFromRoom(String roomId) {
+        if (roomMap == null || !roomMap.containsKey(roomId)) {
+            return 0;
+        }
         Room room = roomMap.get(roomId);
         return room != null ? room.getTotalSeats() : 0;
     }
