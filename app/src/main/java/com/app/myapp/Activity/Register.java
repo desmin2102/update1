@@ -13,7 +13,6 @@ import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
-import androidx.activity.OnBackPressedCallback;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
@@ -43,7 +42,11 @@ public class Register extends AppCompatActivity {
         super.onStart();
         mAuth = FirebaseAuth.getInstance();
         FirebaseUser currentUser = mAuth.getCurrentUser();
-       
+        if (currentUser != null) {
+            // Nếu người dùng đã đăng nhập thì không cần vào Register nữa
+            startActivity(new Intent(Register.this, MainActivity.class));
+            finish();
+        }
     }
 
     @Override
@@ -56,6 +59,8 @@ public class Register extends AppCompatActivity {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
+
+        // Khởi tạo các view
         txtTen = findViewById(R.id.txtTen);
         txtSoDienThoai = findViewById(R.id.txtSoDienThoai);
         txtEmail = findViewById(R.id.txtEmail);
@@ -68,13 +73,7 @@ public class Register extends AppCompatActivity {
         // Nút quay lại
         ImageView imBack = findViewById(R.id.imBack_register);
         imBack.setOnClickListener(v -> onBackPressed());
-        OnBackPressedCallback callback = new OnBackPressedCallback(true) {
-            @Override public void handleOnBackPressed() {
-                Intent intent = new Intent(Register.this, Login.class);
-                startActivity(intent);
-                finish();
-            }
-        }; getOnBackPressedDispatcher().addCallback(this, callback);
+
         initView();
     }
 
@@ -94,7 +93,7 @@ public class Register extends AppCompatActivity {
                     return;
                 } else if (!checkBoxDieuKhoan.isChecked()) {
                     progressBar.setVisibility(View.GONE);
-                    Toast.makeText(Register.this, "Không hợp lệ", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(Register.this, "Bạn cần đồng ý với điều khoản!", Toast.LENGTH_SHORT).show();
                     return;
                 } else {
                     mAuth.createUserWithEmailAndPassword(email, password)
@@ -109,13 +108,15 @@ public class Register extends AppCompatActivity {
                                             saveUserToDatabase(userId, ten, email, phone, password);
                                         }
                                     } else {
-                                        Toast.makeText(Register.this, "Thất Bại", Toast.LENGTH_SHORT).show();
+                                        Toast.makeText(Register.this, "Đăng ký thất bại", Toast.LENGTH_SHORT).show();
                                     }
                                 }
                             });
                 }
             }
         });
+
+        // Kiểm tra mật khẩu dài ít nhất 6 ký tự
         txtMatKhauDK.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -136,28 +137,31 @@ public class Register extends AppCompatActivity {
         });
     }
 
-    private void saveUserToDatabase(String userId, String ten, String email, String phone, String password  ) {
+    private void saveUserToDatabase(String userId, String ten, String email, String phone, String password) {
         FirebaseDatabase database = FirebaseDatabase.getInstance();
         DatabaseReference usersRef = database.getReference("User");
 
         User user = new User(userId, ten, email, phone, password, false); // Gán vai trò "customer"
         usersRef.child(userId).setValue(user).addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
-                Toast.makeText(Register.this, "Tạo Tài Khoản Thành Công!", Toast.LENGTH_SHORT).show();
-                // Chuyển hướng đến trang MainActivity
-                startActivity(new Intent(Register.this, Login.class));
+                // Hiển thị thông báo thành công
+                Toast.makeText(Register.this, "Tạo tài khoản thành công!", Toast.LENGTH_SHORT).show();
+
+                // Đăng xuất ngay sau khi tạo tài khoản thành công
+                mAuth.signOut();
+
             } else {
+                // Nếu lưu thông tin người dùng thất bại
                 Toast.makeText(Register.this, "Lưu thông tin người dùng thất bại", Toast.LENGTH_SHORT).show();
             }
         });
     }
 
+
     @Override
     public void onBackPressed() {
         super.onBackPressed();
-        // Điều hướng về màn hình đăng nhập khi người dùng nhấn nút quay lại
-        Intent intent = new Intent(Register.this, Login.class);
-        startActivity(intent);
+        // Quay lại màn hình chính khi người dùng nhấn nút quay lại
         finish();
     }
 }
