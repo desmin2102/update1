@@ -78,6 +78,14 @@ public class QuanLySuatDetailActivity extends AppCompatActivity {
         edSessionName = findViewById(R.id.edSessionName);
 
         sessionId = getIntent().getStringExtra("SessionId");
+        if(sessionId==null)
+        {
+            btSuaAdmin.setVisibility(View.GONE); // Ẩn nút "Sửa" khi thêm
+            btXoaAdmin.setVisibility(View.GONE); // Ẩn nút "Xóa" khi thêm
+        }
+        else {
+            btThemAdmin.setVisibility(View.GONE); // Ẩn nút "Thêm"
+        }
         // Tham chiếu Firebase
         movieSessionRef = FirebaseDatabase.getInstance().getReference("MovieSession");
         movieRef = FirebaseDatabase.getInstance().getReference("Movie");
@@ -172,22 +180,22 @@ public class QuanLySuatDetailActivity extends AppCompatActivity {
         locationRef.addListenerForSingleValueEvent(new com.google.firebase.database.ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot snapshot) {
-                List<String> locationNames = new ArrayList<>();
+                List<String> locationAddresses = new ArrayList<>();
                 for (DataSnapshot data : snapshot.getChildren()) {
                     Location location = data.getValue(Location.class);
                     if (location != null) {
-                        locationMap.put(location.getId(), location.getName());
-                        locationNames.add(location.getName());
+                        locationMap.put(location.getId(), location.getAddress()); // Đảm bảo bạn lưu địa chỉ thay vì tên
+                        locationAddresses.add(location.getAddress()); // Thêm địa chỉ vào danh sách
                     }
                 }
-                setSpinnerAdapter(spRap, locationNames);
+                setSpinnerAdapter(spRap, locationAddresses);
 
                 // Thiết lập sự kiện chọn item cho Spinner địa điểm
                 spRap.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                     @Override
                     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                        String selectedLocationName = parent.getItemAtPosition(position).toString();
-                        String selectedLocationId = getKeyByValue(locationMap, selectedLocationName);
+                        String selectedLocationAddress = parent.getItemAtPosition(position).toString();
+                        String selectedLocationId = getKeyByValue(locationMap, selectedLocationAddress);
 
                         // Load danh sách phòng chiếu thuộc địa điểm đã chọn
                         loadRoomsByLocation(selectedLocationId);
@@ -204,9 +212,9 @@ public class QuanLySuatDetailActivity extends AppCompatActivity {
                         public void onDataChange(DataSnapshot roomSnapshot) {
                             String locationId = roomSnapshot.child("locationId").getValue(String.class);
                             if (locationId != null) {
-                                String locationName = locationMap.get(locationId);
-                                if (locationName != null) {
-                                    int position = locationNames.indexOf(locationName);
+                                String locationAddress = locationMap.get(locationId);
+                                if (locationAddress != null) {
+                                    int position = locationAddresses.indexOf(locationAddress);
                                     spRap.setSelection(position);
                                 }
                             }
@@ -221,6 +229,7 @@ public class QuanLySuatDetailActivity extends AppCompatActivity {
             @Override
             public void onCancelled(DatabaseError error) {}
         });
+
     }
     private String getKeyByValue(Map<String, String> map, String value) {
         for (Map.Entry<String, String> entry : map.entrySet()) {
@@ -284,10 +293,11 @@ public class QuanLySuatDetailActivity extends AppCompatActivity {
             public void onDataChange(DataSnapshot snapshot) {
                 String locationId = snapshot.child("locationId").getValue(String.class);
                 if (locationId != null) {
-                    String address = locationMap.get(locationId);
-                    if (address != null) {
+                    // Lấy địa chỉ thay vì tên
+                    String locationAddress = locationMap.get(locationId);
+                    if (locationAddress != null) {
                         ArrayAdapter<String> adapter = (ArrayAdapter<String>) spinner.getAdapter();
-                        int position = adapter.getPosition(address);
+                        int position = adapter.getPosition(locationAddress);
                         spinner.setSelection(position);
                     }
                 }
@@ -300,6 +310,7 @@ public class QuanLySuatDetailActivity extends AppCompatActivity {
     }
 
 
+
     private void setSpinnerAdapter(Spinner spinner, List<String> data) {
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, data);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -309,27 +320,65 @@ public class QuanLySuatDetailActivity extends AppCompatActivity {
     private void selectStartDay() {
         Calendar calendar = Calendar.getInstance();
         new DatePickerDialog(this, (view, year, month, day) -> {
+            // Lấy ngày chọn
             String selectedStartDay = year + "-" + (month + 1) + "-" + day;
-            btChonNgay.setText(selectedStartDay);
-            Toast.makeText(this, "Ngày chọn: " + selectedStartDay, Toast.LENGTH_SHORT).show();
+
+            // Kiểm tra xem ngày chọn có phải là ngày trong quá khứ không
+            Calendar selectedDate = Calendar.getInstance();
+            selectedDate.set(year, month, day);
+            if (selectedDate.before(Calendar.getInstance())) {
+                Toast.makeText(this, "Ngày không thể là quá khứ!", Toast.LENGTH_SHORT).show();
+            } else {
+                btChonNgay.setText(selectedStartDay);
+                Toast.makeText(this, "Ngày chọn: " + selectedStartDay, Toast.LENGTH_SHORT).show();
+            }
         }, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH)).show();
     }
 
     private void selectStartHour() {
         Calendar calendar = Calendar.getInstance();
         new TimePickerDialog(this, (view, hour, minute) -> {
+            // Lấy giờ chọn
             String selectedStartHour = hour + ":" + minute;
-            btChonGio.setText(selectedStartHour);
-            Toast.makeText(this, "Giờ chọn: " + selectedStartHour, Toast.LENGTH_SHORT).show();
+
+            // Kiểm tra xem giờ chọn có hợp lệ so với thời gian hiện tại không
+            Calendar selectedTime = Calendar.getInstance();
+            selectedTime.set(Calendar.HOUR_OF_DAY, hour);
+            selectedTime.set(Calendar.MINUTE, minute);
+            if (selectedTime.before(Calendar.getInstance())) {
+                Toast.makeText(this, "Giờ không thể trong quá khứ!", Toast.LENGTH_SHORT).show();
+            } else {
+                btChonGio.setText(selectedStartHour);
+                Toast.makeText(this, "Giờ chọn: " + selectedStartHour, Toast.LENGTH_SHORT).show();
+            }
         }, calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE), true).show();
     }
 
     private void selectEndHour() {
         Calendar calendar = Calendar.getInstance();
         new TimePickerDialog(this, (view, hour, minute) -> {
+            // Lấy giờ kết thúc
             String selectedEndHour = hour + ":" + minute;
-            btChonGioHet.setText(selectedEndHour);
-            Toast.makeText(this, "Giờ hết chọn: " + selectedEndHour, Toast.LENGTH_SHORT).show();
+
+            // Kiểm tra giờ kết thúc phải sau giờ bắt đầu
+            Calendar selectedEndTime = Calendar.getInstance();
+            selectedEndTime.set(Calendar.HOUR_OF_DAY, hour);
+            selectedEndTime.set(Calendar.MINUTE, minute);
+
+            Calendar selectedStartTime = Calendar.getInstance();
+            String startHour = btChonGio.getText().toString();
+            String[] startTimeParts = startHour.split(":");
+            int startStartHour = Integer.parseInt(startTimeParts[0]);
+            int startStartMinute = Integer.parseInt(startTimeParts[1]);
+            selectedStartTime.set(Calendar.HOUR_OF_DAY, startStartHour);
+            selectedStartTime.set(Calendar.MINUTE, startStartMinute);
+
+            if (selectedEndTime.before(selectedStartTime)) {
+                Toast.makeText(this, "Giờ kết thúc phải sau giờ bắt đầu!", Toast.LENGTH_SHORT).show();
+            } else {
+                btChonGioHet.setText(selectedEndHour);
+                Toast.makeText(this, "Giờ hết chọn: " + selectedEndHour, Toast.LENGTH_SHORT).show();
+            }
         }, calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE), true).show();
     }
 

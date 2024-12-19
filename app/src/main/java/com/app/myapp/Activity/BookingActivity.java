@@ -1,87 +1,95 @@
 package com.app.myapp.Activity;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import android.view.MenuItem;
+
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
-import com.app.myapp.Adapter.DayAdapter;
-import com.app.myapp.Class.Room;
+import android.widget.TextView;
+import android.view.MenuItem;
+
+import com.app.myapp.Adapter.DayAdapterBooking;  // Đổi tên import từ DayAdapter thành DayAdapterBooking
+import com.app.myapp.Class.Movie;
 import com.app.myapp.R;
-import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
-public class SessionActivity extends AppCompatActivity {
+public class BookingActivity extends AppCompatActivity {
 
     private RecyclerView recyclerView;
     private RecyclerView movieSessionRecyclerView;
-    private DayAdapter dayAdapter;
+    private DayAdapterBooking dayAdapterBooking;  // Thay đổi từ DayAdapter thành DayAdapterBooking
     private List<Calendar> dayList;
+    private TextView movieTitleTextView;
     private Toolbar toolbar;
     private Spinner spinnerLocation;
     private String selectedLocationId;
-    private BottomNavigationView bottomNavigationView;
+    private String movieId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.session_activity);
+        setContentView(R.layout.activity_booking);
 
-        bottomNavigationView = findViewById(R.id.bottomNavigationView);
-        bottomNavigationView.setSelectedItemId(R.id.session);
-        bottomNavigationView.setOnItemSelectedListener(menuItem -> {
-            bottomNavigationView.getMenu().setGroupCheckable(0, true, true);
-            int id = menuItem.getItemId();
-            if (id == R.id.home) {
-                startActivity(new Intent(getApplicationContext(), MainActivity.class));
-                overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
-                finish();
-                return true;
-            } else if (id == R.id.session) {
-                return true;
-            } else if (id == R.id.movie) {
-                startActivity(new Intent(getApplicationContext(), MovieActivity.class));
-                overridePendingTransition(R.anim.slide_in_right,R.anim.slide_out_left);
-                finish();
-                return true;
-            } else if (id == R.id.promotion) {
-                startActivity(new Intent(getApplicationContext(), AdActivity.class));
-                overridePendingTransition(R.anim.slide_in_right,R.anim.slide_out_left);
-                finish();
-                return true;
-            } else {
-                return false;
-            }
-        });
+        toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        }
 
         recyclerView = findViewById(R.id.recyclerView);
-        movieSessionRecyclerView = findViewById(R.id.sessionRecycleview);
+        movieSessionRecyclerView = findViewById(R.id.movieSessionRecyclerView);
+        movieTitleTextView = findViewById(R.id.movieTitleTextView);
         spinnerLocation = findViewById(R.id.spinnerLocation);
 
         // Thiết lập LayoutManager cho RecyclerView để hiển thị ngày
         LinearLayoutManager layoutManager = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
         recyclerView.setLayoutManager(layoutManager);
 
-        // Thiết lập LayoutManager cho movieSessionRecyclerView
-        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
-        movieSessionRecyclerView.setLayoutManager(linearLayoutManager);
+        // Thiết lập GridLayoutManager cho movieSessionRecyclerView
+        GridLayoutManager gridLayoutManager = new GridLayoutManager(this, 3);
+        movieSessionRecyclerView.setLayoutManager(gridLayoutManager);
 
         // Khởi tạo danh sách ngày
         dayList = generateDays();
+
+        // Nhận dữ liệu từ Intent
+        movieId = getIntent().getStringExtra("movieId");
+
+        // Truy xuất tên phim từ movieId
+        if (movieId != null && !movieId.isEmpty()) {
+            DatabaseReference movieRef = FirebaseDatabase.getInstance().getReference("Movie").child(movieId);
+            movieRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    Movie movie = dataSnapshot.getValue(Movie.class);
+                    if (movie != null) {
+                        movieTitleTextView.setText(movie.getTitle());
+                    }
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+                    // Xử lý lỗi nếu cần
+                }
+            });
+        } else {
+            Log.e("BookingActivity", "movieId is null or empty");
+        }
 
         // Truy xuất danh sách Location từ Firebase và thiết lập Spinner
         DatabaseReference locationRef = FirebaseDatabase.getInstance().getReference("Location");
@@ -98,7 +106,7 @@ public class SessionActivity extends AppCompatActivity {
                         locationIds.add(locationId);
                     }
                 }
-                ArrayAdapter<String> adapter = new ArrayAdapter<>(SessionActivity.this, android.R.layout.simple_spinner_item, locationAddressList);
+                ArrayAdapter<String> adapter = new ArrayAdapter<>(BookingActivity.this, android.R.layout.simple_spinner_item, locationAddressList);
                 adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
                 spinnerLocation.setAdapter(adapter);
 
@@ -113,8 +121,8 @@ public class SessionActivity extends AppCompatActivity {
                     @Override
                     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                         selectedLocationId = locationIds.get(position);
-                        // Cập nhật lại DayAdapter với locationId mới
-                        updateDayAdapter(selectedLocationId);
+                        // Cập nhật lại DayAdapterBooking với locationId mới
+                        updateDayAdapterBooking(movieId, selectedLocationId);
                     }
 
                     @Override
@@ -122,24 +130,20 @@ public class SessionActivity extends AppCompatActivity {
                         // Xử lý nếu không có lựa chọn nào được chọn
                     }
                 });
-
-                // Cập nhật DayAdapter lần đầu tiên
-                updateDayAdapter(selectedLocationId);
             }
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
                 // Xử lý lỗi nếu cần
-                Log.e("SessionActivity", "Failed to load locations: " + databaseError.getMessage());
             }
         });
     }
 
-    private void updateDayAdapter(String locationId) {
-        // Truyền locationId vào DayAdapter (loại bỏ movieId)
-        dayAdapter = new DayAdapter(dayList, this, movieSessionRecyclerView, locationId);
-        recyclerView.setAdapter(dayAdapter);
-        dayAdapter.selectFirstDay(); // Mặc định chọn ngày đầu tiên
+    private void updateDayAdapterBooking(String movieId, String locationId) {
+        // Truyền movieId và locationId vào DayAdapterBooking và mặc định chọn ngày đầu tiên
+        dayAdapterBooking = new DayAdapterBooking(dayList, this, movieSessionRecyclerView, movieId, locationId);
+        recyclerView.setAdapter(dayAdapterBooking);
+        dayAdapterBooking.selectFirstDay(); // Thêm dòng này để mặc định chọn ngày đầu tiên
     }
 
     @Override

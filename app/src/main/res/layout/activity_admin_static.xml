@@ -53,14 +53,84 @@
                 android:textAlignment="center"
                 android:textColor="@color/white"
                 android:textSize="30dp" />
-
         </LinearLayout>
 
-        <!-- RecyclerView hiển thị danh sách phim -->
-        <!-- Container cho Fragment -->
+        <Spinner
+            android:id="@+id/spThongke"
+            android:layout_width="match_parent"
+            android:layout_height="47dp" />
 
+        <EditText
+            android:id="@+id/etSearch"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp"
+            android:drawableStart="@drawable/ic_search"
+            android:hint="Tìm kiếm..."
+            android:padding="12dp" />
+
+
+        <!-- Layout hiển thị thông tin -->
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+
+
+            <TableLayout
+                android:id="@+id/tableThongKeUser"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:stretchColumns="1">
+
+                <!-- Header -->
+                <TableRow>
+
+                    <TextView
+                        android:layout_width="105dp"
+                        android:layout_height="wrap_content"
+                        android:padding="8dp"
+                        android:text="Tên"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:layout_width="120dp"
+                        android:layout_height="wrap_content"
+                        android:padding="8dp"
+                        android:text="Ngày mua"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:padding="8dp"
+                        android:text="Số lượng vé"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:layout_width="115dp"
+                        android:layout_height="wrap_content"
+                        android:padding="8dp"
+                        android:text="Giá vé"
+                        android:textStyle="bold" />
+
+                </TableRow>
+            </TableLayout>
+        </ScrollView>
+
+
+        <LinearLayout
+            android:id="@+id/layoutThongkeRap"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="gone"
+            android:padding="10dp"/>
     </LinearLayout>
 
-    <!-- Navigation Drawer -->
-
 </androidx.drawerlayout.widget.DrawerLayout>
+
+
+
+
+

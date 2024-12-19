@@ -50,7 +50,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="50dp"
                 android:gravity="center"
-                android:orientation="horizontal">
+                android:orientation="horizontal"
+                android:layout_marginLeft="60dp">
 
                 <androidx.appcompat.widget.AppCompatButton
                     android:id="@+id/btnLichSuMuaVe"
@@ -72,16 +73,6 @@
                     android:text="  LỊCH SỬ MUA HÀNG  "
                     android:textColor="@color/black" />
 
-                <androidx.appcompat.widget.AppCompatButton
-                    android:id="@+id/btnDSQua"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginLeft="10dp"
-                    android:layout_marginRight="10dp"
-                    android:background="@drawable/khong_chon_k_gach_chan"
-                    android:onClick="onButtonClick"
-                    android:text="  DANH SÁCH PHIẾU QUÀ TẶNG  "
-                    android:textColor="@color/black" />
             </LinearLayout>
         </HorizontalScrollView>
     </LinearLayout>

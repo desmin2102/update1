@@ -29,6 +29,8 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+
+import org.json.JSONException;
 import org.json.JSONObject;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -44,117 +46,153 @@ import vn.zalopay.sdk.ZaloPayError;
 
 public class PaymentActivity extends AppCompatActivity {
 
+    // Views
     private Toolbar toolbar;
     private ImageView movieImageView;
-    private TextView movieNameTextView;
-    private TextView showTimeTextView;
-    private TextView locationTextView;
-    private TextView priceTextView;
-    private Button btnThanhToan;
-    private Button btnThanhToanB;
-    private TextView soLuongVeTextView;
-    private TextView viTriGheTextView;
-    private String sessionId;
-    private String totalPrice;
+    private TextView movieNameTextView, showTimeTextView, locationTextView, priceTextView;
+    private Button btnThanhToan, btnThanhToanB;
+    private TextView soLuongVeTextView, viTriGheTextView, giamgiaTextView;
+
+    // thông tin session và giá
+    private String sessionId, totalPrice, priceDiscount, ticketPriceAfterDiscount;
+
+    // Thông tin ghế
     private ArrayList<String> selectedSeats;
-    private TextView giamgiaTextView;
-    private String priceDiscount;
-    private String ticketPriceAfterDiscount;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.payment_activity);
 
         // Thanh toán ZaloPay
-        StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
-        StrictMode.setThreadPolicy(policy);
+        StrictMode.setThreadPolicy(new StrictMode.ThreadPolicy.Builder().permitAll().build());
         ZaloPaySDK.init(2554, Environment.SANDBOX);
 
         // Thiết lập Toolbar
+        setupToolbar();
+
+        // Nhận dữ liệu từ Intent
+        getIntentData();
+
+        // Ánh xạ các view
+        mapViews();
+
+        // Áp dụng giảm giá dựa trên hạng
+        applyDiscountBasedOnRank();
+
+        // Hiển thị giá vé và vị trí ghế
+        displaySeatInfo();
+
+        // Khởi tạo dữ liệu
+        initData(sessionId);
+
+        // Thiết lập sự kiện nút bấm
+        setupButtonListeners();
+    }
+
+    private void setupToolbar() {
         toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
-
         toolbar.setNavigationOnClickListener(v -> onBackPressed());
+    }
 
-        // Nhận dữ liệu từ Intent
+    private void getIntentData() {
         sessionId = getIntent().getStringExtra("sessionId");
-        totalPrice = getIntent().getStringExtra("totalPrice"); // Đảm bảo nhận đúng giá trị
+        totalPrice = getIntent().getStringExtra("totalPrice");
         selectedSeats = getIntent().getStringArrayListExtra("selectedSeats");
-        Log.d("PaymentActivity", "Received sessionId: " + sessionId); Log.d("PaymentActivity", "Received totalPrice: " + totalPrice); Log.d("PaymentActivity", "Received selectedSeats: " + selectedSeats.size());
 
-        // Ánh xạ các view
+        Log.d("PaymentActivity", "Received sessionId: " + sessionId);
+        Log.d("PaymentActivity", "Received totalPrice: " + totalPrice);
+        Log.d("PaymentActivity", "Received selectedSeats size: " + (selectedSeats != null ? selectedSeats.size() : 0));
+    }
+
+    private void mapViews() {
         movieImageView = findViewById(R.id.movieImageView);
         movieNameTextView = findViewById(R.id.movieNameTextView);
         showTimeTextView = findViewById(R.id.showTimeTextView);
         locationTextView = findViewById(R.id.locationTextView);
         priceTextView = findViewById(R.id.priceTextView);
         btnThanhToan = findViewById(R.id.btnPayZalo);
-        btnThanhToanB=findViewById(R.id.btnthanhtoanbth);
+        btnThanhToanB = findViewById(R.id.btnthanhtoanbth);
         soLuongVeTextView = findViewById(R.id.soluongveTextView);
         viTriGheTextView = findViewById(R.id.vitrigheTextView);
-        giamgiaTextView=findViewById(R.id.giamgiaTextView);
+        giamgiaTextView = findViewById(R.id.giamgiaTextView);
+    }
 
-        applyDiscountBasedOnRank();
-        // Hiển thị giá vé
+    private void displaySeatInfo() {
         soLuongVeTextView.setText("Số lượng vé: " + selectedSeats.size());
         viTriGheTextView.setText("Vị trí ghế: " + String.join(", ", selectedSeats));
-        // Khởi tạo dữ liệu
-        initData(sessionId);
+    }
 
+    private void setupButtonListeners() {
         btnThanhToanB.setOnClickListener(v -> {
             saveInvoiceAndTickets();
             startActivity(new Intent(PaymentActivity.this, MainActivity.class));
         });
-        // Xử lý sự kiện click nút thanh toán
+
         btnThanhToan.setOnClickListener(v -> {
-            Log.d("PaymentActivity", "Button clicked");
-            CreateOrder orderApi = new CreateOrder();
-            try {
-                // Đảm bảo totalPrice là số nguyên
-                int totalPriceInt = (int) Double.parseDouble(totalPrice);
-                Log.d("PaymentActivity", "Total price (int): " + totalPriceInt);
-
-                JSONObject data = orderApi.createOrder(String.valueOf(totalPriceInt));
-                Log.d("PaymentActivity", "Order created: " + data.toString());
-
-                String code = data.getString("return_code");
-                Log.d("PaymentActivity", "Return code: " + code);
-                if (code.equals("1")) {
-                    String token = data.getString("zp_trans_token");
-                    Log.d("PaymentActivity", "Transaction token: " + token);
-                    ZaloPaySDK.getInstance().payOrder(PaymentActivity.this, token, "demozpdk://app", new PayOrderListener() {
-                        @Override
-                        public void onPaymentSucceeded(String s, String s1, String s2) {
-                            Log.d("PaymentActivity", "Payment succeeded");
-                        }
-
-                        @Override
-                        public void onPaymentCanceled(String s, String s1) {
-                            Log.d("PaymentActivity", "Payment canceled");
-                            Toast.makeText(PaymentActivity.this, "Thanh toán bị hủy", Toast.LENGTH_SHORT).show();
-                        }
-
-                        @Override
-                        public void onPaymentError(ZaloPayError zaloPayError, String s, String s1) {
-                            Log.d("PaymentActivity", "Payment error: " + zaloPayError.toString());
-                            Toast.makeText(PaymentActivity.this, "Thanh toán thất bại", Toast.LENGTH_SHORT).show();
-                        }
-                    });
-                } else {
-                    Log.d("PaymentActivity", "Return code is not 1");
-                    String subReturnCode = data.getString("sub_return_code");
-                    String subReturnMessage = data.getString("sub_return_message");
-                    Log.d("PaymentActivity", "Sub return code: " + subReturnCode);
-                    Log.d("PaymentActivity", "Sub return message: " + subReturnMessage);
-                }
-            } catch (Exception e) {
-                Log.e("PaymentActivity", "Exception: ", e);
-                e.printStackTrace();
-            }
+            handlePayment();
         });
+    }
+
+    private void handlePayment() {
+        Log.d("PaymentActivity", "Payment button clicked");
+
+        CreateOrder orderApi = new CreateOrder();
+        try {
+            int totalPriceInt = (int) Double.parseDouble(totalPrice);
+            Log.d("PaymentActivity", "Total price (int): " + totalPriceInt);
+
+            JSONObject data = orderApi.createOrder(String.valueOf(totalPriceInt));
+            Log.d("PaymentActivity", "Order created: " + data.toString());
+
+            String code = data.getString("return_code");
+            if ("1".equals(code)) {
+                String token = data.getString("zp_trans_token");
+                Log.d("PaymentActivity", "Transaction token: " + token);
+
+                ZaloPaySDK.getInstance().payOrder(PaymentActivity.this, token, "demozpdk://app", new PayOrderListener() {
+                    @Override
+                    public void onPaymentSucceeded(String s, String s1, String s2) {
+                        Log.d("PaymentActivity", "Payment succeeded");
+                        startActivity(new Intent(PaymentActivity.this, MainActivity.class));
+                        saveInvoiceAndTickets();
+                    }
+
+                    @Override
+                    public void onPaymentCanceled(String s, String s1) {
+                        Log.d("PaymentActivity", "Payment canceled");
+                        Toast.makeText(PaymentActivity.this, "Thanh toán bị hủy", Toast.LENGTH_SHORT).show();
+                        finish(); // Quay lại màn hình hiện tại (đóng màn hình hiện tại)
+                    }
+
+
+                    @Override
+                    public void onPaymentError(ZaloPayError zaloPayError, String s, String s1) {
+                        Log.d("PaymentActivity", "Payment error: " + zaloPayError.toString());
+                        Toast.makeText(PaymentActivity.this, "Thanh toán thất bại", Toast.LENGTH_SHORT).show();
+                        finish(); // Quay lại màn hình hiện tại (đóng màn hình hiện tại)
+                    }
+                });
+            } else {
+                handlePaymentError(data);
+            }
+        } catch (Exception e) {
+            Log.e("PaymentActivity", "Exception: ", e);
+            e.printStackTrace();
+        }
+    }
+
+    private void handlePaymentError(JSONObject data) throws JSONException {
+        Log.d("PaymentActivity", "Return code is not 1");
+        String subReturnCode = data.getString("sub_return_code");
+        String subReturnMessage = data.getString("sub_return_message");
+
+        Log.d("PaymentActivity", "Sub return code: " + subReturnCode);
+        Log.d("PaymentActivity", "Sub return message: " + subReturnMessage);
     }
 
     private void initData(String sessionId) {
@@ -165,19 +203,11 @@ public class PaymentActivity extends AppCompatActivity {
                 if (dataSnapshot.exists()) {
                     MovieSession session = dataSnapshot.getValue(MovieSession.class);
                     if (session != null) {
-                        String movieId = session.getMovieId();
-                        String roomId = session.getRoomId();
-                        String startDay = session.getStartDay();
-                        String startTime = session.getStartTime();
-                        String endTime = session.getEndTime();
-                        String formattedShowTime = formatShowTime(startDay, startTime, endTime);
-
-                        // Hiển thị khung giờ chiếu
+                        String formattedShowTime = formatShowTime(session.getStartDay(), session.getStartTime(), session.getEndTime());
                         showTimeTextView.setText(formattedShowTime);
-
-                        loadMovieData(movieId);
-                        loadRoomData(roomId);
-                        Log.e("initData","thanh cong");
+                        loadMovieData(session.getMovieId());
+                        loadRoomData(session.getRoomId());
+                        Log.d("initData", "Data loaded successfully");
                     } else {
                         Log.e("initData", "MovieSession data is null");
                     }
@@ -216,7 +246,6 @@ public class PaymentActivity extends AppCompatActivity {
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         if (user != null) {
             String userId = user.getUid();
-            Log.d("applyDiscountBasedOnRank", "User ID: " + userId);
 
             // Truy vấn thông tin user từ Firebase
             DatabaseReference userRef = FirebaseDatabase.getInstance().getReference("User").child(userId);
@@ -227,8 +256,6 @@ public class PaymentActivity extends AppCompatActivity {
                     if (customer != null) {
                         String rankId = customer.getRankId();
                         if (rankId != null) {
-                            Log.d("applyDiscountBasedOnRank", "Rank ID: " + rankId);
-
                             // Truy vấn thông tin rank dựa trên rankId
                             DatabaseReference rankRef = FirebaseDatabase.getInstance().getReference("Rank").child(rankId);
                             rankRef.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -253,44 +280,30 @@ public class PaymentActivity extends AppCompatActivity {
                                                 if (selectedSeats != null && selectedSeats.size() > 0) {
                                                     double ticketPriceAfterDiscountDouble = priceAfterDiscount / selectedSeats.size();  // Tính toán giá vé sau giảm
                                                     ticketPriceAfterDiscount = String.valueOf((int) ticketPriceAfterDiscountDouble); // Ép kiểu về int để loại bỏ phần thập phân
-                                                } else {
-                                                    Log.e("applyDiscountBasedOnRank", "No seats selected");
                                                 }
                                             } catch (NumberFormatException e) {
-                                                Log.e("applyDiscountBasedOnRank", "Invalid totalPrice format: " + totalPrice);
+                                                Log.e("applyDiscountBasedOnRank", "Định dạng totalPrice không hợp lệ: " + totalPrice);
                                             }
-                                        } else {
-                                            Log.e("applyDiscountBasedOnRank", "Invalid discount value: " + discount);
                                         }
-                                    } else {
-                                        Log.e("applyDiscountBasedOnRank", "Rank data is null");
                                     }
                                 }
 
                                 @Override
                                 public void onCancelled(@NonNull DatabaseError databaseError) {
-                                    Log.e("applyDiscountBasedOnRank", "Rank Data Retrieval Cancelled: " + databaseError.getMessage());
+                                    Log.e("applyDiscountBasedOnRank", "Lỗi khi lấy dữ liệu Rank: " + databaseError.getMessage());
                                 }
                             });
-                        } else {
-                            Log.e("applyDiscountBasedOnRank", "Rank ID is null for customer: " + userId);
                         }
-                    } else {
-                        Log.e("applyDiscountBasedOnRank", "Customer is null");
                     }
                 }
 
                 @Override
                 public void onCancelled(@NonNull DatabaseError databaseError) {
-                    Log.e("applyDiscountBasedOnRank", "User Data Retrieval Cancelled: " + databaseError.getMessage());
+                    Log.e("applyDiscountBasedOnRank", "Lỗi khi lấy dữ liệu người dùng: " + databaseError.getMessage());
                 }
             });
-        } else {
-            Log.e("applyDiscountBasedOnRank", "User is null");
         }
     }
-
-
 
 
     private void loadMovieData(String movieId) {
@@ -318,7 +331,11 @@ public class PaymentActivity extends AppCompatActivity {
         });
     }
 
-    private String getCurrentDate() { SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()); return sdf.format(new Date()); }
+    private String getCurrentDate() {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+        return sdf.format(new Date());
+    }
+
     private void loadRoomData(String roomId) {
         DatabaseReference roomRef = FirebaseDatabase.getInstance().getReference("Room").child(roomId);
         roomRef.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -350,7 +367,7 @@ public class PaymentActivity extends AppCompatActivity {
                     String locationAddress = dataSnapshot.child("address").getValue(String.class);
 
                     // Hiển thị cơ sở
-                    locationTextView.setText("Địa điểm: "+locationAddress);
+                    locationTextView.setText("Địa điểm: " + locationAddress);
                 }
             }
 
@@ -360,8 +377,8 @@ public class PaymentActivity extends AppCompatActivity {
             }
         });
     }
+
     private void saveInvoiceAndTickets() {
-        // Lấy thông tin người dùng
         String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
 
         // Tạo hóa đơn
@@ -371,7 +388,7 @@ public class PaymentActivity extends AppCompatActivity {
             Invoice invoice = new Invoice(invoiceId, selectedSeats.size(), Double.parseDouble(priceDiscount), Double.parseDouble(totalPrice), userId, getCurrentDate());
             invoicesRef.child(invoiceId).setValue(invoice).addOnCompleteListener(task -> {
                 if (task.isSuccessful()) {
-                        Toast.makeText(PaymentActivity.this, "Hóa đơn đã được lưu", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(PaymentActivity.this, "Hóa đơn đã được lưu", Toast.LENGTH_SHORT).show();
                 } else {
                     Toast.makeText(PaymentActivity.this, "Lỗi khi lưu hóa đơn", Toast.LENGTH_SHORT).show();
                 }
@@ -383,23 +400,22 @@ public class PaymentActivity extends AppCompatActivity {
             for (String seatName : selectedSeats) {
                 String ticketId = ticketsRef.push().getKey();
                 if (ticketId != null) {
-                    // Lấy thông tin từ sessionId
                     DatabaseReference sessionRef = FirebaseDatabase.getInstance().getReference("MovieSession").child(sessionId);
                     sessionRef.addListenerForSingleValueEvent(new ValueEventListener() {
                         @Override
                         public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                             if (dataSnapshot.exists()) {
                                 String movieId = dataSnapshot.child("movieId").getValue(String.class);
-                                String roomId = dataSnapshot.child("roomId").getValue(String.class); // Lấy roomId
+                                String roomId = dataSnapshot.child("roomId").getValue(String.class);
 
                                 // Truy vấn thông tin từ Room để lấy locationId
                                 DatabaseReference roomRef = FirebaseDatabase.getInstance().getReference("Room").child(roomId);
                                 roomRef.addListenerForSingleValueEvent(new ValueEventListener() {
                                     @Override
                                     public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                                        String locationId = dataSnapshot.child("locationId").getValue(String.class); // Lấy locationId từ Room
-                                        String startTime = dataSnapshot.child("startTime").getValue(String.class); // Lấy startTime
-                                        String price = dataSnapshot.child("price").getValue(String.class); // Lấy price
+                                        String locationId = dataSnapshot.child("locationId").getValue(String.class);
+                                        String startTime = dataSnapshot.child("startTime").getValue(String.class);
+                                        String price = dataSnapshot.child("price").getValue(String.class);
 
                                         // Lấy tên phim, tên phòng và tên địa điểm
                                         fetchDetails(movieId, roomId, locationId, seatName, ticketId, startTime, ticketPriceAfterDiscount, userId, invoiceId);
@@ -421,7 +437,7 @@ public class PaymentActivity extends AppCompatActivity {
 
                                     @Override
                                     public void onCancelled(@NonNull DatabaseError databaseError) {
-                                        Toast.makeText(PaymentActivity.this, "Lỗi khi lấy thông tin phòng", Toast.LENGTH_SHORT).show();
+                                        // Xử lý lỗi nếu cần
                                     }
                                 });
                             }
@@ -429,7 +445,7 @@ public class PaymentActivity extends AppCompatActivity {
 
                         @Override
                         public void onCancelled(@NonNull DatabaseError databaseError) {
-                            Toast.makeText(PaymentActivity.this, "Lỗi khi lấy thông tin phiên chiếu", Toast.LENGTH_SHORT).show();
+                            // Xử lý lỗi nếu cần
                         }
                     });
                 }
@@ -437,27 +453,21 @@ public class PaymentActivity extends AppCompatActivity {
         }
     }
 
-
-
     private void updateAvailableSeats(String sessionId, int seatsDelta) {
         DatabaseReference sessionRef = FirebaseDatabase.getInstance().getReference("MovieSession").child(sessionId);
         sessionRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 if (dataSnapshot.exists()) {
-                    // Lấy thông tin phiên chiếu hiện tại
                     MovieSession session = dataSnapshot.getValue(MovieSession.class);
                     if (session != null) {
-                        // Cập nhật số lượng ghế còn lại
                         int updatedAvailableSeats = session.getAvailableSeats() - seatsDelta;
-                        if (updatedAvailableSeats < 0) {
-                            updatedAvailableSeats = 0; // Đảm bảo số ghế không bị âm
-                        }                        sessionRef.child("availableSeats").setValue(updatedAvailableSeats)
+                        updatedAvailableSeats = Math.max(updatedAvailableSeats, 0);  // Đảm bảo số ghế không bị âm
+
+                        sessionRef.child("availableSeats").setValue(updatedAvailableSeats)
                                 .addOnCompleteListener(task -> {
-                                    if (task.isSuccessful()) {
-                                        Log.d("PaymentActivity", "Available seats updated successfully.");
-                                    } else {
-                                        Log.e("PaymentActivity", "Failed to update available seats: " + task.getException().getMessage());
+                                    if (!task.isSuccessful()) {
+                                        // Xử lý lỗi nếu cần
                                     }
                                 });
                     }
@@ -466,46 +476,39 @@ public class PaymentActivity extends AppCompatActivity {
 
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
-                Log.e("PaymentActivity", "Failed to read session: " + databaseError.getMessage());
+                // Xử lý lỗi nếu cần
             }
         });
     }
 
-
-
-
     private void fetchDetails(String movieId, String roomId, String locationId, String seatName, String ticketId, String startTime, String price, String userId, String invoiceId) {
-        // Truy xuất tên phim từ movieId
         DatabaseReference movieRef = FirebaseDatabase.getInstance().getReference("Movie").child(movieId);
         movieRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 String movieName = dataSnapshot.child("title").getValue(String.class);
 
-                // Truy xuất tên phòng từ roomId
                 DatabaseReference roomRef = FirebaseDatabase.getInstance().getReference("Room").child(roomId);
                 roomRef.addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                         String roomName = dataSnapshot.child("name").getValue(String.class);
-                        Log.d("LocationID", "Location ID: " + locationId);
+
                         if (locationId == null || locationId.isEmpty()) {
-                            Log.e("LocationID", "Location ID is null or empty!");
+                            // Xử lý lỗi nếu locationId không hợp lệ
                         }
-                        // Truy xuất tên địa điểm từ locationId
+
                         DatabaseReference locationRef = FirebaseDatabase.getInstance().getReference("Location").child(locationId);
                         locationRef.addListenerForSingleValueEvent(new ValueEventListener() {
                             @Override
                             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                                 String locationName = dataSnapshot.child("name").getValue(String.class);
 
-                                // Lưu vé vào Firebase
-                                Ticket ticket = new Ticket(ticketId, seatName, sessionId, price, userId,invoiceId);
+                                Ticket ticket = new Ticket(ticketId, seatName, sessionId, price, userId, invoiceId);
                                 DatabaseReference ticketsRef = FirebaseDatabase.getInstance().getReference("Ticket");
                                 ticketsRef.child(ticketId).setValue(ticket).addOnCompleteListener(task -> {
                                     if (task.isSuccessful()) {
-                                        // Cộng thêm 300 điểm cho mỗi vé được mua
-                                        updateCustomerPoints(userId, 300);
+                                        updateCustomerPoints(userId, 300);  // Cộng điểm cho người dùng
                                         Toast.makeText(PaymentActivity.this, "Vé đã được lưu", Toast.LENGTH_SHORT).show();
                                     } else {
                                         Toast.makeText(PaymentActivity.this, "Lỗi khi lưu vé", Toast.LENGTH_SHORT).show();
@@ -534,8 +537,6 @@ public class PaymentActivity extends AppCompatActivity {
         });
     }
 
-
-    // Phương thức cộng điểm cho người dùng
     private void updateCustomerPoints(String userId, int points) {
         DatabaseReference userRef = FirebaseDatabase.getInstance().getReference("User").child(userId);
         userRef.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -550,11 +551,10 @@ public class PaymentActivity extends AppCompatActivity {
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                // Handle possible errors.
+                // Xử lý lỗi nếu cần
             }
         });
     }
-
 
     @Override
     protected void onNewIntent(Intent intent) {

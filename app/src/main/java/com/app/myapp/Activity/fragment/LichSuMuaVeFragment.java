@@ -35,12 +35,9 @@ import java.util.List;
  */
 public class LichSuMuaVeFragment extends Fragment {
 
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
 
-    // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
 
@@ -48,15 +45,6 @@ public class LichSuMuaVeFragment extends Fragment {
         // Required empty public constructor
     }
 
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment LichSuMuaVeFragment.
-     */
-    // TODO: Rename and change types and number of parameters
     public static LichSuMuaVeFragment newInstance(String param1, String param2) {
         LichSuMuaVeFragment fragment = new LichSuMuaVeFragment();
         Bundle args = new Bundle();
@@ -74,77 +62,86 @@ public class LichSuMuaVeFragment extends Fragment {
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
     }
+
     private FirebaseAuth mAuth;
     private RecyclerView recyclerView_LichSuMuaVe;
     private MovieVerticalAdapter mvAdapter;
     private List<Movie> listMovie_lichSuVe = new ArrayList<>();
     private List<Ticket> listTicket = new ArrayList<>();
     private List<MovieSession> listMovieSession = new ArrayList<>();
-    private Button btnVeDaDat, btnVeDaHuy;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_lich_su_mua_ve, container, false);
 
-//        btnVeDaDat = view.findViewById(R.id.btnVeDaDat);
-//        btnVeDaHuy = view.findViewById(R.id.btnVeDaHuy);
-
-        // Tìm RecyclerView bằng View đã được inflate
         recyclerView_LichSuMuaVe = view.findViewById(R.id.recyclerView_Lich_Su_Ve);
         recyclerView_LichSuMuaVe.setLayoutManager(new LinearLayoutManager(getContext()));
         mvAdapter = new MovieVerticalAdapter(listMovie_lichSuVe);
         recyclerView_LichSuMuaVe.setAdapter(mvAdapter);
+
         fetchMoviesFromDatabase();
         return view;
     }
 
     private void fetchMoviesFromDatabase() {
-        DatabaseReference databaseReferenceMovie1 = FirebaseDatabase.getInstance().getReference("Ticket");
-        databaseReferenceMovie1.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                mAuth = FirebaseAuth.getInstance();
-                FirebaseUser currentUser = mAuth.getCurrentUser();
-                String userId = currentUser.getUid();
-                listTicket.clear();
-                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-                    Ticket ticket = snapshot.getValue(Ticket.class);
-                    if (userId.equals(ticket.getUserId())) {
+        mAuth = FirebaseAuth.getInstance();
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+        if (currentUser != null) {
+            String userId = currentUser.getUid();
+
+            // Fetch Ticket Data
+            DatabaseReference databaseReferenceTicket = FirebaseDatabase.getInstance().getReference("Ticket");
+            databaseReferenceTicket.orderByChild("userId").equalTo(userId).addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    listTicket.clear();
+                    for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                        Ticket ticket = snapshot.getValue(Ticket.class);
                         listTicket.add(ticket);
                     }
+                    fetchMovieSessionsAndMovies();
                 }
-            }
 
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                Log.e("FirebaseError", "Failed to load data: " + databaseError.getMessage());
-            }
-        });
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+                    Log.e("FirebaseError", "Failed to load ticket data: " + databaseError.getMessage());
+                }
+            });
+        } else {
+            // Handle unauthenticated user
+            Log.e("AuthError", "User is not logged in.");
+        }
+    }
 
-        DatabaseReference databaseReferenceMovie = FirebaseDatabase.getInstance().getReference("MovieSession");
-        databaseReferenceMovie.addValueEventListener(new ValueEventListener() {
+    private void fetchMovieSessionsAndMovies() {
+        // Fetch MovieSession Data
+        DatabaseReference databaseReferenceMovieSession = FirebaseDatabase.getInstance().getReference("MovieSession");
+        databaseReferenceMovieSession.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 listMovieSession.clear();
                 for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
                     MovieSession movieSession = snapshot.getValue(MovieSession.class);
-                    for(Ticket ticket : listTicket) {
-                        if(ticket.getSessionId().equals(movieSession.getSessionId()))
+                    for (Ticket ticket : listTicket) {
+                        if (ticket.getSessionId().equals(movieSession.getSessionId())) {
                             listMovieSession.add(movieSession);
+                        }
                     }
                 }
+                fetchMoviesFromDatabaseAgain();
             }
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
-                Log.e("FirebaseError", "Failed to load data: " + databaseError.getMessage());
+                Log.e("FirebaseError", "Failed to load movie session data: " + databaseError.getMessage());
             }
         });
+    }
 
-
-        DatabaseReference databaseReferenceMovie2 = FirebaseDatabase.getInstance().getReference("Movie");
-        databaseReferenceMovie2.addValueEventListener(new ValueEventListener() {
+    private void fetchMoviesFromDatabaseAgain() {
+        // Fetch Movie Data
+        DatabaseReference databaseReferenceMovie = FirebaseDatabase.getInstance().getReference("Movie");
+        databaseReferenceMovie.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 listMovie_lichSuVe.clear();
@@ -161,23 +158,24 @@ public class LichSuMuaVeFragment extends Fragment {
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
-                Log.e("FirebaseError", "Failed to load data: " + databaseError.getMessage());
+                Log.e("FirebaseError", "Failed to load movie data: " + databaseError.getMessage());
             }
         });
     }
 
-//    public void onButtonClick(View view) {
-//        int viewId = view.getId();
-//        if (viewId == R.id.btnVeDaDat) {
-//            btnVeDaDat.setBackgroundResource(R.drawable.button_chon);
-//            btnVeDaDat.setTextColor(getResources().getColor(android.R.color.white));
-//            btnVeDaHuy.setBackgroundResource(R.drawable.button_khong_chon);
-//            btnVeDaHuy.setTextColor(getResources().getColor(android.R.color.black));
-//        } else if (viewId == R.id.btnVeDaHuy) {
-//            btnVeDaHuy.setBackgroundResource(R.drawable.button_chon);
-//            btnVeDaHuy.setTextColor(getResources().getColor(android.R.color.white));
-//            btnVeDaDat.setBackgroundResource(R.drawable.button_khong_chon);
-//            btnVeDaDat.setTextColor(getResources().getColor(android.R.color.black));
-//        }
-//    }
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        listMovie_lichSuVe.clear();
+        listTicket.clear();
+        listMovieSession.clear();
+        mvAdapter.notifyDataSetChanged();
+    }
+    public void clearData() {
+        listMovie_lichSuVe.clear();
+        listTicket.clear();
+        listMovieSession.clear();
+        mvAdapter.notifyDataSetChanged();
+    }
+
 }

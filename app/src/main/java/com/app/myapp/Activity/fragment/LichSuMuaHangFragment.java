@@ -10,10 +10,8 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 
 import com.app.myapp.Adapter.InvoiceAdapter;
-import com.app.myapp.Adapter.MovieVerticalAdapter;
 import com.app.myapp.Class.Invoice;
 import com.app.myapp.Class.Movie;
 import com.app.myapp.Class.MovieSession;
@@ -37,12 +35,8 @@ import java.util.List;
  */
 public class LichSuMuaHangFragment extends Fragment {
 
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
-
-    // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
 
@@ -50,15 +44,6 @@ public class LichSuMuaHangFragment extends Fragment {
         // Required empty public constructor
     }
 
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment LichSuMuaHangFragment.
-     */
-    // TODO: Rename and change types and number of parameters
     public static LichSuMuaHangFragment newInstance(String param1, String param2) {
         LichSuMuaHangFragment fragment = new LichSuMuaHangFragment();
         Bundle args = new Bundle();
@@ -74,6 +59,10 @@ public class LichSuMuaHangFragment extends Fragment {
         if (getArguments() != null) {
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
+
+            if (mParam1 == null || mParam2 == null) {
+                Log.e("LichSuMuaHangFragment", "Arguments are missing or invalid.");
+            }
         }
     }
 
@@ -87,107 +76,134 @@ public class LichSuMuaHangFragment extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_lich_su_mua_hang, container, false);
 
         recyclerView_LichSuMuaHang = view.findViewById(R.id.recyclerView_Lich_Su_Mua);
         recyclerView_LichSuMuaHang.setLayoutManager(new LinearLayoutManager(getContext()));
-        mvAdapter = new InvoiceAdapter(listMovie_lichSuMua,listInvoice);
+        mvAdapter = new InvoiceAdapter(listMovie_lichSuMua, listInvoice);
         recyclerView_LichSuMuaHang.setAdapter(mvAdapter);
+
         fetchMoviesFromDatabase();
         return view;
     }
 
     private void fetchMoviesFromDatabase() {
-        DatabaseReference databaseReferenceMovie = FirebaseDatabase.getInstance().getReference("Invoice");
-        databaseReferenceMovie.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                mAuth = FirebaseAuth.getInstance();
-                FirebaseUser currentUser = mAuth.getCurrentUser();
-                String userId = currentUser.getUid();
-                Log.e("FirebaseError", "Failed to load data: " +userId);
-                listInvoice.clear();
-                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-                    Invoice invoice = snapshot.getValue(Invoice.class);
-                    //Log.e("FirebaseError", "Failed to load data: " + invoice.getInvoiceId());
-                    if (userId.equals(invoice.getUserId())) {
-                        Log.e("FirebaseError", "Failed to load data: da vao duoc");
-                        listInvoice.add(invoice);
-                        Log.e("FirebaseError", "Failed to load data:"+ listInvoice);
-                    }
-                }
-            }
+        mAuth = FirebaseAuth.getInstance();
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+        if (currentUser != null) {
+            String userId = currentUser.getUid();
 
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                Log.e("FirebaseError", "Failed to load data: " + databaseError.getMessage());
-            }
-        });
-        DatabaseReference databaseReferenceMovie1 = FirebaseDatabase.getInstance().getReference("Ticket");
-        databaseReferenceMovie1.addValueEventListener(new ValueEventListener() {
+            // 1. Lấy danh sách hóa đơn
+            DatabaseReference databaseReferenceInvoice = FirebaseDatabase.getInstance().getReference("Invoice");
+            databaseReferenceInvoice.orderByChild("userId").equalTo(userId).addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    listInvoice.clear();
+                    for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                        Invoice invoice = snapshot.getValue(Invoice.class);
+                        if (invoice != null) {
+                            listInvoice.add(invoice);
+                        }
+                    }
+                    fetchTickets();
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+                    Log.e("FirebaseError", "Failed to load invoices: " + databaseError.getMessage());
+                }
+            });
+        } else {
+            Log.e("AuthError", "User is not logged in.");
+        }
+    }
+
+    private void fetchTickets() {
+        // 2. Lấy danh sách vé
+        DatabaseReference databaseReferenceTicket = FirebaseDatabase.getInstance().getReference("Ticket");
+        databaseReferenceTicket.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 listTicket.clear();
                 for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
                     Ticket ticket = snapshot.getValue(Ticket.class);
-                    for (Invoice invoice : listInvoice) {
-                        if (invoice.getInvoiceId().equals(ticket.getInvoiceId())) {
-                            listTicket.add(ticket);
+                    if (ticket != null) {
+                        for (Invoice invoice : listInvoice) {
+                            if (invoice.getInvoiceId() != null && invoice.getInvoiceId().equals(ticket.getInvoiceId())) {
+                                listTicket.add(ticket);
+                            }
                         }
                     }
                 }
+                fetchMovieSessions();
             }
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
-                Log.e("FirebaseError", "Failed to load data: " + databaseError.getMessage());
+                Log.e("FirebaseError", "Failed to load tickets: " + databaseError.getMessage());
             }
         });
+    }
 
-
-        DatabaseReference databaseReferenceMovie2 = FirebaseDatabase.getInstance().getReference("MovieSession");
-        databaseReferenceMovie2.addValueEventListener(new ValueEventListener() {
+    private void fetchMovieSessions() {
+        // 3. Lấy danh sách phiên chiếu phim
+        DatabaseReference databaseReferenceMovieSession = FirebaseDatabase.getInstance().getReference("MovieSession");
+        databaseReferenceMovieSession.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 listMovieSession.clear();
                 for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
                     MovieSession movieSession = snapshot.getValue(MovieSession.class);
-                    for(Ticket ticket : listTicket) {
-                        if(ticket.getSessionId().equals(movieSession.getSessionId()))
-                            listMovieSession.add(movieSession);
+                    if (movieSession != null) {
+                        for (Ticket ticket : listTicket) {
+                            if (ticket.getSessionId() != null && ticket.getSessionId().equals(movieSession.getSessionId())) {
+                                listMovieSession.add(movieSession);
+                            }
+                        }
                     }
                 }
+                fetchMovies();
             }
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
-                Log.e("FirebaseError", "Failed to load data: " + databaseError.getMessage());
+                Log.e("FirebaseError", "Failed to load movie sessions: " + databaseError.getMessage());
             }
         });
+    }
 
-
-        DatabaseReference databaseReferenceMovie3 = FirebaseDatabase.getInstance().getReference("Movie");
-        databaseReferenceMovie3.addValueEventListener(new ValueEventListener() {
+    private void fetchMovies() {
+        // 4. Lấy danh sách phim
+        DatabaseReference databaseReferenceMovie = FirebaseDatabase.getInstance().getReference("Movie");
+        databaseReferenceMovie.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 listMovie_lichSuMua.clear();
                 for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
                     Movie movie = snapshot.getValue(Movie.class);
-                    for (MovieSession movieSession : listMovieSession) {
-                        if (movie.getId().equals(movieSession.getMovieId())) {
-                            listMovie_lichSuMua.add(movie);
+                    if (movie != null) {
+                        for (MovieSession movieSession : listMovieSession) {
+                            if (movie.getId() != null && movie.getId().equals(movieSession.getMovieId())) {
+                                listMovie_lichSuMua.add(movie);
+                            }
                         }
                     }
                 }
-                mvAdapter.notifyDataSetChanged();
+                mvAdapter.notifyDataSetChanged(); // Cập nhật giao diện
             }
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
-                Log.e("FirebaseError", "Failed to load data: " + databaseError.getMessage());
+                Log.e("FirebaseError", "Failed to load movies: " + databaseError.getMessage());
             }
         });
+    }
+    public void clearData() {
+        listMovie_lichSuMua.clear();
+        listTicket.clear();
+        listInvoice.clear();
+        listMovieSession.clear();
+        mvAdapter.notifyDataSetChanged();
     }
 
 }

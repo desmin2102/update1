@@ -29,7 +29,6 @@ import com.app.myapp.Class.Ad;
 import com.app.myapp.Class.Customer;
 import com.app.myapp.Class.Movie;
 import com.app.myapp.Class.Rank;
-import com.app.myapp.MonthlyDeductPointsReceiver;
 import com.app.myapp.R;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
@@ -86,7 +85,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        setupMonthlyDeductAlarm();
         drawerLayout = findViewById(R.id.main);
         backgroundImageView = findViewById(R.id.backgroundImageView);
         navigationView = findViewById(R.id.nav_view);
@@ -170,16 +168,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 updateBackgroundImage(imageUrl); } });
     }
 
-    private void setupMonthlyDeductAlarm() {
-        AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
-        Intent intent = new Intent(this, MonthlyDeductPointsReceiver.class);
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_IMMUTABLE);
-        Calendar calendar = Calendar.getInstance();
-        calendar.set(Calendar.DAY_OF_MONTH, 1);
-        calendar.set(Calendar.HOUR_OF_DAY, 0);
-        calendar.set(Calendar.MINUTE, 0);
-        calendar.set(Calendar.SECOND, 0); alarmManager.setInexactRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), AlarmManager.INTERVAL_DAY * 30, pendingIntent);
-    }
+
 
     private void initializeViewsMenu() {
         bottomNavigationView = findViewById(R.id.bottomNavigationView);
@@ -213,7 +202,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     Movie currentMovie = listMovie.get(viewPagermv.getCurrentItem());
 
                     // Mở LocationActivity khi nhấn nút Booking
-                    Intent intent = new Intent(MainActivity.this, ScheduleActivity.class);
+                    Intent intent = new Intent(MainActivity.this, BookingActivity.class);
                     intent.putExtra("movieId", currentMovie.getId()); // Truyền ID của bộ phim
                     startActivity(intent);
                 } else {
@@ -396,8 +385,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @Override
     protected void onResume() {
         super.onResume();
-        handler.postDelayed(runnable, 3000);
+        handler.postDelayed(runnable, 3000);  // Đảm bảo tự động trượt quảng cáo
+
+        // Tải lại danh sách phim
+        fetchMoviesFromDatabase();
+
+        // Hiển thị lại thông tin người dùng
+        showUserInfomation();
     }
+
 
 
     private void saveData() {

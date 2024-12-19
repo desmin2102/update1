@@ -39,6 +39,10 @@
             android:name=".Activity.PhimDaXem"
             android:exported="false" />
         <activity
+            android:name=".Activity.BookingActivity"
+            android:exported="false" />
+
+        <activity
             android:name=".Activity.ChinhSach"
             android:exported="false" /> <!-- Cac activity -->
         <!-- Admin -->

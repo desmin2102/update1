@@ -27,7 +27,7 @@ public class Ticket {
         return invoiceId;
     }
 
-    public void setInvoiceId(String ticketId) {
+    public void setInvoiceId(String invoiceId) {
         this.invoiceId = invoiceId;
     }
 

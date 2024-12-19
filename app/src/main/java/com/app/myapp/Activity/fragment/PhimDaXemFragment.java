@@ -37,33 +37,27 @@ import java.util.List;
  */
 public class PhimDaXemFragment extends Fragment {
 
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
+    private FirebaseAuth mAuth;
+    private RecyclerView recyclerView;
+    private MovieVerticalAdapter mvAdapter;
+    private List<Movie> listMovie = new ArrayList<>();
+    private List<Ticket> listTicket = new ArrayList<>();
+    private List<MovieSession> listMovieSession = new ArrayList<>();
 
-    // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
 
+    // Empty constructor is required for Fragment
     public PhimDaXemFragment() {
         // Required empty public constructor
     }
 
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment PhimDaXemFragment.
-     */
-    // TODO: Rename and change types and number of parameters
+    // Factory method to create a new instance of PhimDaXemFragment
     public static PhimDaXemFragment newInstance(String param1, String param2) {
         PhimDaXemFragment fragment = new PhimDaXemFragment();
         Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
+        args.putString("param1", param1);
+        args.putString("param2", param2);
         fragment.setArguments(args);
         return fragment;
     }
@@ -72,78 +66,81 @@ public class PhimDaXemFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
+            mParam1 = getArguments().getString("param1");
+            mParam2 = getArguments().getString("param2");
         }
     }
 
-    private FirebaseAuth mAuth;
-    private RecyclerView recyclerView;
-    private MovieVerticalAdapter mvAdapter;
-    private List<Movie> listMovie = new ArrayList<>();
-    private List<Ticket> listTicket = new ArrayList<>();
-    private List<MovieSession> listMovieSession = new ArrayList<>();
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_phim_da_xem, container, false);
-        // Tìm RecyclerView bằng View đã được inflate
+
         recyclerView = view.findViewById(R.id.recyclerView_phim_Da_Xem);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         mvAdapter = new MovieVerticalAdapter(listMovie);
         recyclerView.setAdapter(mvAdapter);
+
         fetchMoviesFromDatabase();
         return view;
     }
 
     private void fetchMoviesFromDatabase() {
+        mAuth = FirebaseAuth.getInstance();
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+        if (currentUser != null) {
+            String userId = currentUser.getUid();
 
-        DatabaseReference databaseReferenceMovie1 = FirebaseDatabase.getInstance().getReference("Ticket");
-        databaseReferenceMovie1.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                mAuth = FirebaseAuth.getInstance();
-                FirebaseUser currentUser = mAuth.getCurrentUser();
-                String userId = currentUser.getUid();
-                listTicket.clear();
-                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-                    Ticket ticket = snapshot.getValue(Ticket.class);
-                    if (userId.equals(ticket.getUserId())) {
+            // Fetch Ticket Data
+            DatabaseReference databaseReferenceTicket = FirebaseDatabase.getInstance().getReference("Ticket");
+            databaseReferenceTicket.orderByChild("userId").equalTo(userId).addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    listTicket.clear();
+                    for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                        Ticket ticket = snapshot.getValue(Ticket.class);
                         listTicket.add(ticket);
                     }
+                    fetchMovieSessionsAndMovies();
                 }
-            }
 
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                Log.e("FirebaseError", "Failed to load data: " + databaseError.getMessage());
-            }
-        });
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+                    Log.e("FirebaseError", "Failed to load ticket data: " + databaseError.getMessage());
+                }
+            });
+        } else {
+            Log.e("AuthError", "User is not logged in.");
+        }
+    }
 
-        DatabaseReference databaseReferenceMovie = FirebaseDatabase.getInstance().getReference("MovieSession");
-        databaseReferenceMovie.addValueEventListener(new ValueEventListener() {
+    private void fetchMovieSessionsAndMovies() {
+        DatabaseReference databaseReferenceMovieSession = FirebaseDatabase.getInstance().getReference("MovieSession");
+        databaseReferenceMovieSession.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 listMovieSession.clear();
                 for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
                     MovieSession movieSession = snapshot.getValue(MovieSession.class);
-                    for(Ticket ticket : listTicket) {
-                        if(ticket.getSessionId().equals(movieSession.getSessionId()))
-                             listMovieSession.add(movieSession);
+                    for (Ticket ticket : listTicket) {
+                        if (ticket.getSessionId().equals(movieSession.getSessionId())) {
+                            listMovieSession.add(movieSession);
+                        }
                     }
                 }
+                fetchMoviesFromDatabaseAgain();
             }
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
-                Log.e("FirebaseError", "Failed to load data: " + databaseError.getMessage());
+                Log.e("FirebaseError", "Failed to load movie session data: " + databaseError.getMessage());
             }
         });
+    }
 
-
-        DatabaseReference databaseReferenceMovie2 = FirebaseDatabase.getInstance().getReference("Movie");
-        databaseReferenceMovie2.addValueEventListener(new ValueEventListener() {
+    private void fetchMoviesFromDatabaseAgain() {
+        // Fetch Movie Data
+        DatabaseReference databaseReferenceMovie = FirebaseDatabase.getInstance().getReference("Movie");
+        databaseReferenceMovie.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 listMovie.clear();
@@ -160,8 +157,17 @@ public class PhimDaXemFragment extends Fragment {
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
-                Log.e("FirebaseError", "Failed to load data: " + databaseError.getMessage());
+                Log.e("FirebaseError", "Failed to load movie data: " + databaseError.getMessage());
             }
         });
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        listMovie.clear();
+        listTicket.clear();
+        listMovieSession.clear();
+        mvAdapter.notifyDataSetChanged();
     }
 }

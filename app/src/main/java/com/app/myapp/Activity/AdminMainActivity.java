@@ -110,10 +110,11 @@ public class AdminMainActivity extends AppCompatActivity {
                 editor.apply();
 
                 // Quay về màn hình chính (MainActivity)
-                Intent intent = new Intent(AdminMainActivity.this, MainActivity.class);
+                Intent intent = new Intent(AdminMainActivity.this, Login.class);
                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK); // Đảm bảo thoát hoàn toàn khỏi AdminMainActivity
                 startActivity(intent);
                 finish(); // Kết thúc AdminMainActivity để tránh quay lại bằng nút Back
+
             }
         });
     }

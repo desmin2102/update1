@@ -37,14 +37,12 @@ public class DayAdapter extends RecyclerView.Adapter<DayAdapter.DayViewHolder> {
     private SessionAdapter sessionAdapter;
     private Map<String, Room> roomMap = new HashMap<>();
     private String locationId;
-    private String movieId; // Thêm biến movieId
 
-    public DayAdapter(List<Calendar> dayList, Context context, RecyclerView movieSessionRecyclerView, String locationId, String movieId) {
+    public DayAdapter(List<Calendar> dayList, Context context, RecyclerView movieSessionRecyclerView, String locationId) {
         this.dayList = dayList;
         this.context = context;
         this.movieSessionRecyclerView = movieSessionRecyclerView;
         this.locationId = locationId;
-        this.movieId = movieId; // Nhận movieId từ constructor
         loadRooms();
         if (!dayList.isEmpty()) {
             selectFirstDay();
@@ -88,7 +86,8 @@ public class DayAdapter extends RecyclerView.Adapter<DayAdapter.DayViewHolder> {
         return dayList.size();
     }
 
-    static class DayViewHolder extends RecyclerView.ViewHolder {
+    // Lớp ViewHolder không cần 'static'
+    public class DayViewHolder extends RecyclerView.ViewHolder {
         TextView dayOfWeekTextView, dateTextView;
 
         DayViewHolder(@NonNull View itemView) {
@@ -105,10 +104,10 @@ public class DayAdapter extends RecyclerView.Adapter<DayAdapter.DayViewHolder> {
         showMovieDetails(dayList.get(0));
     }
 
-    @SuppressLint("NotifyDataSetChanged")
     private void showMovieDetails(Calendar calendar) {
-        Log.d("DayAdapter", "Showing details for locationId: " + locationId);
+        Log.d("DayAdapter", "Showing all movie sessions for locationId: " + locationId);
 
+        // Lấy tất cả các MovieSession
         DatabaseReference sessionsRef = FirebaseDatabase.getInstance().getReference("MovieSession");
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
         String dateString = sdf.format(calendar.getTime());
@@ -118,32 +117,70 @@ public class DayAdapter extends RecyclerView.Adapter<DayAdapter.DayViewHolder> {
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 Map<String, List<MovieSession>> movieSessionsMap = new HashMap<>();
 
+                // Kiểm tra nếu dữ liệu trả về là null hoặc rỗng
+                if (!dataSnapshot.exists()) {
+                    Log.e("DayAdapter", "No data found for date: " + dateString);
+                }
+
                 for (DataSnapshot sessionSnapshot : dataSnapshot.getChildren()) {
                     MovieSession session = sessionSnapshot.getValue(MovieSession.class);
-                    Log.d("DayAdapter", "Loaded session: " + session);
-                    if (session != null && getLocationIdFromRoomId(session.getRoomId()).equals(locationId)) {
-                        if (movieId == null || session.getMovieId().equals(movieId)) { // Kiểm tra movieId
+
+                    // Kiểm tra giá trị của session và roomId
+                    if (session != null) {
+                        Log.d("DayAdapter", "Session loaded: " + session.getMovieId() + " RoomId: " + session.getRoomId());
+
+                        String roomId = session.getRoomId();
+                        String locationIdFromRoom = getLocationIdFromRoomId(roomId);
+
+                        // Kiểm tra roomId và locationIdFromRoom có phải là null không
+                        if (roomId == null) {
+                            Log.e("DayAdapter", "RoomId is null for session with MovieId: " + session.getMovieId());
+                        } else {
+                            Log.d("DayAdapter", "RoomId: " + roomId);
+                        }
+
+                        if (locationIdFromRoom == null) {
+                            Log.e("DayAdapter", "LocationIdFromRoom is null for RoomId: " + roomId);
+                        } else {
+                            Log.d("DayAdapter", "LocationIdFromRoom: " + locationIdFromRoom);
+                        }
+
+                        // So sánh locationId từ room và locationId mà bạn đã truyền vào
+                        if (locationIdFromRoom != null && locationIdFromRoom.equals(locationId)) {
                             if (!movieSessionsMap.containsKey(session.getMovieId())) {
                                 movieSessionsMap.put(session.getMovieId(), new ArrayList<>());
                             }
                             movieSessionsMap.get(session.getMovieId()).add(session);
+                        } else {
+                            Log.e("DayAdapter", "LocationId does not match. Expected: " + locationId + ", Found: " + locationIdFromRoom);
                         }
+                    } else {
+                        Log.e("DayAdapter", "Session is null");
                     }
                 }
 
+                // Lấy tất cả các Movie
                 List<Movie> movies = new ArrayList<>();
                 DatabaseReference moviesRef = FirebaseDatabase.getInstance().getReference("Movie");
                 moviesRef.addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot movieSnapshot) {
+                        if (!movieSnapshot.exists()) {
+                            Log.e("DayAdapter", "No movies found in the database.");
+                        }
+
                         for (DataSnapshot movieData : movieSnapshot.getChildren()) {
                             Movie movie = movieData.getValue(Movie.class);
-                            if (movie != null && (movieId == null || movie.getId().equals(movieId))) { // Kiểm tra movieId
+                            if (movie != null) {
                                 movies.add(movie);
                                 Log.d("DayAdapter", "Loaded movie: " + movie.getTitle());
+                            } else {
+                                Log.e("DayAdapter", "Movie data is null.");
                             }
                         }
-                        sessionAdapter = new SessionAdapter(movies, movieSessionsMap, roomMap, context); // Cập nhật constructor của SessionAdapter
+
+                        // Sau khi đã lấy xong Movies và MovieSessions
+                        sessionAdapter = new SessionAdapter(movies, movieSessionsMap, roomMap, context);
                         movieSessionRecyclerView.setLayoutManager(new LinearLayoutManager(context));
                         movieSessionRecyclerView.setAdapter(sessionAdapter);
                         sessionAdapter.notifyDataSetChanged(); // Cập nhật dữ liệu cho RecyclerView
@@ -165,7 +202,15 @@ public class DayAdapter extends RecyclerView.Adapter<DayAdapter.DayViewHolder> {
 
     private String getLocationIdFromRoomId(String roomId) {
         Room room = roomMap.get(roomId);
-        return room != null ? room.getLocationId() : null;
+
+        // Kiểm tra roomId có bị null không
+        if (room == null) {
+            Log.e("DayAdapter", "Room not found for roomId: " + roomId);
+            return null; // Trả về null nếu không tìm thấy Room
+        }
+
+        Log.d("DayAdapter", "Room found for roomId: " + roomId);
+        return room.getLocationId();
     }
 
     private void loadRooms() {
@@ -173,10 +218,17 @@ public class DayAdapter extends RecyclerView.Adapter<DayAdapter.DayViewHolder> {
         roomsRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if (!dataSnapshot.exists()) {
+                    Log.e("DayAdapter", "No rooms found in the database.");
+                }
+
                 for (DataSnapshot roomSnapshot : dataSnapshot.getChildren()) {
                     Room room = roomSnapshot.getValue(Room.class);
                     if (room != null) {
                         roomMap.put(room.getRoomId(), room);
+                        Log.d("DayAdapter", "Room loaded: " + room.getRoomId());
+                    } else {
+                        Log.e("DayAdapter", "Room data is null.");
                     }
                 }
             }
