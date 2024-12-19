@@ -148,7 +148,7 @@ public class Register extends AppCompatActivity {
             if (task.isSuccessful()) {
                 Toast.makeText(Register.this, "Tạo Tài Khoản Thành Công!", Toast.LENGTH_SHORT).show();
                 // Chuyển hướng đến trang MainActivity
-                startActivity(new Intent(Register.this, MainActivity.class));
+                startActivity(new Intent(Register.this, Login.class));
                 finishAffinity(); // Đóng tất cả activity trước MainActivity này
             } else {
                 Toast.makeText(Register.this, "Lưu thông tin người dùng thất bại", Toast.LENGTH_SHORT).show();
