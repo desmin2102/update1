@@ -15,6 +15,7 @@ public class Invoice {
     public Invoice(String invoiceId, int totalTickets, double priceDiscount,double totalPrice, String userId, String purchaseDate) {
         this.invoiceId = invoiceId;
         this.totalTickets = totalTickets;
+        this.priceDiscount=priceDiscount;
         this.totalPrice = totalPrice;
         this.userId = userId;
         this.purchaseDate = purchaseDate; // Khởi tạo purchaseDate

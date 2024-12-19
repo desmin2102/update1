@@ -41,6 +41,8 @@ public class Customer extends User {
             return "1";
         }
     }
+    public void deductPoints(int points) { this.diemTV = Math.max(0, this.diemTV - points);
+        this.rankId = determineRankId(this.diemTV); }
 }
 
 

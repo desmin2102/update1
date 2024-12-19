@@ -1,5 +1,7 @@
 package com.app.myapp.Activity;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
@@ -28,6 +30,7 @@ import com.app.myapp.Class.Ad;
 import com.app.myapp.Class.Customer;
 import com.app.myapp.Class.Movie;
 import com.app.myapp.Class.Rank;
+import com.app.myapp.MonthlyDeductPointsReceiver;
 import com.app.myapp.R;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
@@ -45,6 +48,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 import jp.wasabeef.glide.transformations.BlurTransformation;
@@ -83,7 +87,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
+        setupMonthlyDeductAlarm();
         drawerLayout = findViewById(R.id.main);
         backgroundImageView = findViewById(R.id.backgroundImageView);
         navigationView = findViewById(R.id.nav_view);
@@ -165,6 +169,17 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 String imageUrl = listMovie.get(position).getImageUrl();
                 // Cập nhật nền ứng dụng
                 updateBackgroundImage(imageUrl); } });
+    }
+
+    private void setupMonthlyDeductAlarm() {
+        AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
+        Intent intent = new Intent(this, MonthlyDeductPointsReceiver.class);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_IMMUTABLE);
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(Calendar.DAY_OF_MONTH, 1);
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0); alarmManager.setInexactRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), AlarmManager.INTERVAL_DAY * 30, pendingIntent);
     }
 
     private void initializeViewsMenu() {
