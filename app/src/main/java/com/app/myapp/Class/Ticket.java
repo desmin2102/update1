@@ -40,7 +40,7 @@ public class Ticket {
         this.ticketId = ticketId;
     }
 
-    public String getSeatId() {
+    public String getSeatName() {
         return seatName;
     }
 
