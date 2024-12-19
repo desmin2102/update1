@@ -43,10 +43,7 @@ public class Register extends AppCompatActivity {
         super.onStart();
         mAuth = FirebaseAuth.getInstance();
         FirebaseUser currentUser = mAuth.getCurrentUser();
-        if (currentUser != null) {
-            startActivity(new Intent(Register.this, MainActivity.class));
-            finish();
-        }
+       
     }
 
     @Override
