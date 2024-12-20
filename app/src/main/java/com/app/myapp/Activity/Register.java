@@ -152,7 +152,8 @@ public class Register extends AppCompatActivity {
 
                 // Đăng xuất ngay sau khi tạo tài khoản thành công
                 mAuth.signOut();
-
+                startActivity(new Intent(Register.this,Login.class));
+                finish();
             } else {
                 // Nếu lưu thông tin người dùng thất bại
                 Toast.makeText(Register.this, "Lưu thông tin người dùng thất bại", Toast.LENGTH_SHORT).show();

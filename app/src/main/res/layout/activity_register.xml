@@ -134,10 +134,11 @@
             android:layout_marginLeft="160dp"
             android:layout_marginTop="10dp"
             android:gravity="center"
+            android:padding="10dp"
             android:background="@drawable/intro_background"
             android:text="Đăng Ký"
             android:textColor="@color/white"
-            android:textSize="20dp" />
+            android:textSize="15dp" />
 
     </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>
