@@ -18,6 +18,7 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import com.app.myapp.Class.Customer;
 import com.app.myapp.Class.User;
 import com.app.myapp.R;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -141,8 +142,10 @@ public class Register extends AppCompatActivity {
         FirebaseDatabase database = FirebaseDatabase.getInstance();
         DatabaseReference usersRef = database.getReference("User");
 
-        User user = new User(userId, ten, email, phone, password, false); // Gán vai trò "customer"
-        usersRef.child(userId).setValue(user).addOnCompleteListener(task -> {
+        int rankId = 1; // Mặc định rankId là 1 cho khách hàng
+        Customer customer = new Customer(userId, ten, email, phone, password, false,0,"1"); // Tạo đối tượng Customer với rankId
+
+        usersRef.child(userId).setValue(customer).addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
                 // Hiển thị thông báo thành công
                 Toast.makeText(Register.this, "Tạo tài khoản thành công!", Toast.LENGTH_SHORT).show();
@@ -156,6 +159,7 @@ public class Register extends AppCompatActivity {
             }
         });
     }
+
 
 
     @Override
