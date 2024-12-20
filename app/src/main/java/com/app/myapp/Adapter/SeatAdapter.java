@@ -5,13 +5,10 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
-
 import com.app.myapp.Class.Seat;
 import com.app.myapp.R;
-
 import java.util.List;
 import java.util.Set;
 
@@ -19,13 +16,13 @@ public class SeatAdapter extends RecyclerView.Adapter<SeatAdapter.SeatViewHolder
 
     private List<Seat> seatList;
     private Set<String> purchasedSeats;
-    private Set<String> selectedSeats; // Thêm biến để theo dõi ghế đang được chọn
+    private Set<String> selectedSeats;
     private Context context;
 
     public SeatAdapter(List<Seat> seatList, Set<String> purchasedSeats, Set<String> selectedSeats, Context context) {
         this.seatList = seatList;
         this.purchasedSeats = purchasedSeats;
-        this.selectedSeats = selectedSeats; // Khởi tạo selectedSeats
+        this.selectedSeats = selectedSeats;
         this.context = context;
     }
 
@@ -47,9 +44,9 @@ public class SeatAdapter extends RecyclerView.Adapter<SeatAdapter.SeatViewHolder
                 return;
             }
             if (selectedSeats.contains(seat.getSeatName())) {
-                selectedSeats.remove(seat.getSeatName()); // Bỏ chọn ghế
+                selectedSeats.remove(seat.getSeatName());
             } else {
-                selectedSeats.add(seat.getSeatName()); // Chọn ghế
+                selectedSeats.add(seat.getSeatName());
             }
             notifyItemChanged(position);
         });

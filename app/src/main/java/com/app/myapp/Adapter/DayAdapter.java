@@ -38,13 +38,15 @@ public class DayAdapter extends RecyclerView.Adapter<DayAdapter.DayViewHolder> {
     private Map<String, Room> roomMap = new HashMap<>();
     private String locationId;
     private String movieId; // Thêm biến movieId
+    private boolean isRoomsLoaded = false;
 
+    // Cập nhật constructor để chấp nhận thêm movieId
     public DayAdapter(List<Calendar> dayList, Context context, RecyclerView movieSessionRecyclerView, String locationId, String movieId) {
         this.dayList = dayList;
         this.context = context;
         this.movieSessionRecyclerView = movieSessionRecyclerView;
         this.locationId = locationId;
-        this.movieId = movieId; // Nhận movieId từ constructor
+        this.movieId = movieId;
         loadRooms();
         if (!dayList.isEmpty()) {
             selectFirstDay();
@@ -79,7 +81,9 @@ public class DayAdapter extends RecyclerView.Adapter<DayAdapter.DayViewHolder> {
             notifyItemChanged(selectedPosition);
             selectedPosition = holder.getAdapterPosition();
             notifyItemChanged(selectedPosition);
-            showMovieDetails(calendar);
+            if (isRoomsLoaded) {
+                showMovieDetails(calendar);
+            }
         });
     }
 
@@ -88,7 +92,7 @@ public class DayAdapter extends RecyclerView.Adapter<DayAdapter.DayViewHolder> {
         return dayList.size();
     }
 
-    static class DayViewHolder extends RecyclerView.ViewHolder {
+    public class DayViewHolder extends RecyclerView.ViewHolder {
         TextView dayOfWeekTextView, dateTextView;
 
         DayViewHolder(@NonNull View itemView) {
@@ -102,27 +106,47 @@ public class DayAdapter extends RecyclerView.Adapter<DayAdapter.DayViewHolder> {
     public void selectFirstDay() {
         selectedPosition = 0;
         notifyDataSetChanged();
-        showMovieDetails(dayList.get(0));
+        if (isRoomsLoaded) {
+            showMovieDetails(dayList.get(0));
+        }
     }
 
-    @SuppressLint("NotifyDataSetChanged")
     private void showMovieDetails(Calendar calendar) {
-        Log.d("DayAdapter", "Showing details for locationId: " + locationId);
-
         DatabaseReference sessionsRef = FirebaseDatabase.getInstance().getReference("MovieSession");
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
-        String dateString = sdf.format(calendar.getTime());
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+        SimpleDateFormat dateTimeFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault());
+
+        String dateString = dateFormat.format(calendar.getTime());
 
         sessionsRef.orderByChild("startDay").equalTo(dateString).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 Map<String, List<MovieSession>> movieSessionsMap = new HashMap<>();
 
+                // Lấy thời gian hiện tại
+                Calendar now = Calendar.getInstance();
+
                 for (DataSnapshot sessionSnapshot : dataSnapshot.getChildren()) {
                     MovieSession session = sessionSnapshot.getValue(MovieSession.class);
-                    Log.d("DayAdapter", "Loaded session: " + session);
-                    if (session != null && getLocationIdFromRoomId(session.getRoomId()).equals(locationId)) {
-                        if (movieId == null || session.getMovieId().equals(movieId)) { // Kiểm tra movieId
+
+                    if (session != null) {
+                        String roomId = session.getRoomId();
+                        String locationIdFromRoom = getLocationIdFromRoomId(roomId);
+
+                        // Kết hợp ngày và giờ bắt đầu thành một chuỗi
+                        String startDateTimeString = session.getStartDay() + " " + session.getStartTime();
+
+                        // Chuyển đổi thời gian bắt đầu của phiên chiếu từ chuỗi sang Calendar
+                        Calendar startDayTime = Calendar.getInstance();
+                        try {
+                            startDayTime.setTime(dateTimeFormat.parse(startDateTimeString));
+                        } catch (Exception e) {
+                            Log.e("DayAdapter", "Error parsing startDayTime: " + e.getMessage());
+                            continue;
+                        }
+
+                        // Kiểm tra nếu thời gian hiện tại trước thời gian bắt đầu của phiên chiếu và movieId trùng khớp
+                        if (locationIdFromRoom != null && locationIdFromRoom.equals(locationId) && now.before(startDayTime) && (movieId == null || movieId.equals(session.getMovieId()))) {
                             if (!movieSessionsMap.containsKey(session.getMovieId())) {
                                 movieSessionsMap.put(session.getMovieId(), new ArrayList<>());
                             }
@@ -138,15 +162,16 @@ public class DayAdapter extends RecyclerView.Adapter<DayAdapter.DayViewHolder> {
                     public void onDataChange(@NonNull DataSnapshot movieSnapshot) {
                         for (DataSnapshot movieData : movieSnapshot.getChildren()) {
                             Movie movie = movieData.getValue(Movie.class);
-                            if (movie != null && (movieId == null || movie.getId().equals(movieId))) { // Kiểm tra movieId
+                            // Chỉ thêm phim nếu movieId trùng khớp hoặc không có movieId cụ thể
+                            if (movie != null && (movieId == null || movieId.equals(movie.getId()))) {
                                 movies.add(movie);
-                                Log.d("DayAdapter", "Loaded movie: " + movie.getTitle());
                             }
                         }
-                        sessionAdapter = new SessionAdapter(movies, movieSessionsMap, roomMap, context); // Cập nhật constructor của SessionAdapter
+
+                        sessionAdapter = new SessionAdapter(movies, movieSessionsMap, roomMap, context);
                         movieSessionRecyclerView.setLayoutManager(new LinearLayoutManager(context));
                         movieSessionRecyclerView.setAdapter(sessionAdapter);
-                        sessionAdapter.notifyDataSetChanged(); // Cập nhật dữ liệu cho RecyclerView
+                        sessionAdapter.notifyDataSetChanged();
                     }
 
                     @Override
@@ -165,7 +190,13 @@ public class DayAdapter extends RecyclerView.Adapter<DayAdapter.DayViewHolder> {
 
     private String getLocationIdFromRoomId(String roomId) {
         Room room = roomMap.get(roomId);
-        return room != null ? room.getLocationId() : null;
+
+        if (room == null) {
+            Log.e("DayAdapter", "Room not found for roomId: " + roomId);
+            return null;
+        }
+
+        return room.getLocationId();
     }
 
     private void loadRooms() {
@@ -173,11 +204,20 @@ public class DayAdapter extends RecyclerView.Adapter<DayAdapter.DayViewHolder> {
         roomsRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if (!dataSnapshot.exists()) {
+                    Log.e("DayAdapter", "No rooms found in the database.");
+                }
+
                 for (DataSnapshot roomSnapshot : dataSnapshot.getChildren()) {
                     Room room = roomSnapshot.getValue(Room.class);
                     if (room != null) {
                         roomMap.put(room.getRoomId(), room);
                     }
+                }
+
+                isRoomsLoaded = true;
+                if (selectedPosition != RecyclerView.NO_POSITION && !dayList.isEmpty()) {
+                    showMovieDetails(dayList.get(selectedPosition));
                 }
             }
 

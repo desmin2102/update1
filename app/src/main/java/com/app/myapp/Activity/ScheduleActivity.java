@@ -144,4 +144,3 @@ public class ScheduleActivity extends AppCompatActivity {
         return days;
     }
 }
-

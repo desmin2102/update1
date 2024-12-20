@@ -2,6 +2,7 @@ package com.app.myapp.Activity;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.Button;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
@@ -10,7 +11,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
 import com.app.myapp.Adapter.SeatAdapter;
 import com.app.myapp.Class.MovieSession;
 import com.app.myapp.Class.Room;
@@ -21,7 +21,6 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -52,7 +51,6 @@ public class SeatSelectionActivity extends AppCompatActivity {
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             getSupportActionBar().setTitle("Chọn ghế"); // Đặt tiêu đề mới
-
         }
 
         toolbar.setNavigationOnClickListener(v -> onBackPressed());
@@ -95,27 +93,7 @@ public class SeatSelectionActivity extends AppCompatActivity {
         selectedSeats = new HashSet<>();
 
         // Truy xuất danh sách các ghế đã được mua từ Firebase
-        DatabaseReference seatsRef = FirebaseDatabase.getInstance().getReference("Seat");
-        seatsRef.orderByChild("sessionId").equalTo(sessionId).addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                for (DataSnapshot seatSnapshot : dataSnapshot.getChildren()) {
-                    Seat seat = seatSnapshot.getValue(Seat.class);
-                    if (seat != null) {
-                        purchasedSeats.add(seat.getSeatName()); // Sử dụng seatName thay vì seatId
-                    }
-                }
-                // Cập nhật adapter sau khi tải dữ liệu
-                if (seatAdapter != null) {
-                    seatAdapter.notifyDataSetChanged();
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-                // Xử lý lỗi nếu cần
-            }
-        });
+        refreshSeatsData();
 
         // Xử lý sự kiện khi người dùng nhấn vào nút "Mua vé"
         buyTicketButton.setOnClickListener(v -> {
@@ -145,14 +123,53 @@ public class SeatSelectionActivity extends AppCompatActivity {
                 builder.setTitle("Thông tin vé")
                         .setMessage("Số lượng vé: " + totalTickets + "\nVị trí ghế: " + ticketInfo + "\nTổng tiền: " + totalPrice + " đồng")
                         .setPositiveButton("Xác nhận", (dialog, which) -> {
+                            // Cập nhật trạng thái ghế đã mua lên Firebase trước khi chuyển qua trang hóa đơn
+                            DatabaseReference seatsRef = FirebaseDatabase.getInstance().getReference("Seat");
+                            for (String seat : selectedSeats) {
+                                seatsRef.child(seat).child("status").setValue("purchased");
+                            }
+
+                            // Chuyển sang trang hóa đơn
                             Intent intent = new Intent(SeatSelectionActivity.this, PaymentActivity.class);
                             intent.putExtra("sessionId", sessionId);
-                            intent.putExtra("totalPrice",  String.valueOf(totalPrice));
+                            intent.putExtra("totalPrice", String.valueOf(totalPrice));
                             intent.putStringArrayListExtra("selectedSeats", new ArrayList<>(selectedSeats));
                             startActivity(intent);
                         })
                         .setNegativeButton("Hủy", null)
                         .show();
+            }
+        });
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        refreshSeatsData();
+    }
+
+    private void refreshSeatsData() {
+        // Làm mới danh sách ghế từ Firebase
+        DatabaseReference seatsRef = FirebaseDatabase.getInstance().getReference("Seat");
+        seatsRef.orderByChild("sessionId").equalTo(sessionId).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                purchasedSeats.clear();
+                for (DataSnapshot seatSnapshot : dataSnapshot.getChildren()) {
+                    Seat seat = seatSnapshot.getValue(Seat.class);
+                    if (seat != null) {
+                        purchasedSeats.add(seat.getSeatName());
+                    }
+                }
+                // Cập nhật lại giao diện
+                if (seatAdapter != null) {
+                    seatAdapter.notifyDataSetChanged();
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                Log.e("SeatSelectionActivity", "Failed to load seats: " + databaseError.getMessage());
             }
         });
     }
