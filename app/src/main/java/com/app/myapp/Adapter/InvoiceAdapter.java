@@ -53,6 +53,7 @@ public class InvoiceAdapter extends RecyclerView.Adapter<InvoiceAdapter.MovieVie
             Invoice invoice = movieInvoicesList.get(position);
 
             holder.txtMaVe.setText(invoice.getInvoiceId());
+            holder.txtSoVe.setText("Số lượng vé: "+ invoice.getTotalTickets());
             holder.setImage(movie);
             holder.tvTitle.setText(movie.getTitle());
             holder.tvDuration.setText("Thời lượng: " + movie.getDuration());
@@ -75,13 +76,14 @@ public class InvoiceAdapter extends RecyclerView.Adapter<InvoiceAdapter.MovieVie
     }
 
     public static class MovieViewHolder extends RecyclerView.ViewHolder {
-        private TextView txtMaVe, tvTitle, tvDuration, tvShowTime, txtPrice;
+        private TextView txtMaVe, tvTitle, tvDuration, tvShowTime, txtPrice,txtSoVe;
         private ImageView imageViewmv;
 
         public MovieViewHolder(@NonNull View itemView) {
             super(itemView);
             txtMaVe = itemView.findViewById(R.id.txtMaVe);
             tvTitle = itemView.findViewById(R.id.tvTitle);
+            txtSoVe=itemView.findViewById(R.id.txtSoVe);
             tvDuration = itemView.findViewById(R.id.tvDuration);
             tvShowTime = itemView.findViewById(R.id.tvShowTime);
             imageViewmv = itemView.findViewById(R.id.imgPoster);
@@ -97,15 +99,15 @@ public class InvoiceAdapter extends RecyclerView.Adapter<InvoiceAdapter.MovieVie
                     .apply(requestOptions)
                     .into(imageViewmv);
 
-            imageViewmv.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Intent intent = new Intent(itemView.getContext(), MovieDetailsActivity.class);
-                    intent.putExtra("imageMovieUrl", movie.getImageUrl());
-                    intent.putExtra("movieId", movie.getId());
-                    itemView.getContext().startActivity(intent);
-                }
-            });
+//            imageViewmv.setOnClickListener(new View.OnClickListener() {
+//                @Override
+//                public void onClick(View v) {
+//                    Intent intent = new Intent(itemView.getContext(), MovieDetailsActivity.class);
+//                    intent.putExtra("imageMovieUrl", movie.getImageUrl());
+//                    intent.putExtra("movieId", movie.getId());
+//                    itemView.getContext().startActivity(intent);
+//                }
+//            });
         }
     }
 }

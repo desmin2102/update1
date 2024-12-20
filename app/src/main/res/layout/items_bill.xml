@@ -10,7 +10,7 @@
         android:id="@+id/imgPoster"
         android:layout_width="175dp"
         android:layout_marginTop="10dp"
-        android:layout_height="220dp"
+        android:layout_height="270dp"
         app:srcCompat="@drawable/button_chon" />
 
     <LinearLayout
@@ -54,6 +54,15 @@
             android:textColor="@android:color/white"
             android:textSize="18sp"
             android:textStyle="bold" />
+        <TextView
+            android:id="@+id/txtSoVe"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@android:color/white"
+            android:padding="5dp"
+            android:text="">
+
+        </TextView>
 
         <TextView
             android:id="@+id/tvDuration"
