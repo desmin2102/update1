@@ -45,92 +45,61 @@ import vn.zalopay.sdk.Environment;
 import vn.zalopay.sdk.ZaloPayError;
 
 public class PaymentActivity extends AppCompatActivity {
-
-    // Views
-    private Toolbar toolbar;
-    private ImageView movieImageView;
-    private TextView movieNameTextView, showTimeTextView, locationTextView, priceTextView;
-    private Button btnThanhToan, btnThanhToanB;
-    private TextView soLuongVeTextView, viTriGheTextView, giamgiaTextView;
-
-    // thông tin session và giá
-    private String sessionId, totalPrice, priceDiscount, ticketPriceAfterDiscount;
-
-    // Thông tin ghế
-    private ArrayList<String> selectedSeats;
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.payment_activity);
-
-        // Thanh toán ZaloPay
-        StrictMode.setThreadPolicy(new StrictMode.ThreadPolicy.Builder().permitAll().build());
-        ZaloPaySDK.init(2554, Environment.SANDBOX);
-
-        // Thiết lập Toolbar
-        setupToolbar();
-
-        // Nhận dữ liệu từ Intent
-        getIntentData();
-
-        // Ánh xạ các view
-        mapViews();
-
-        // Áp dụng giảm giá dựa trên hạng
-        applyDiscountBasedOnRank();
-
-        // Hiển thị giá vé và vị trí ghế
-        displaySeatInfo();
-
-        // Khởi tạo dữ liệu
-        initData(sessionId);
-
-        // Thiết lập sự kiện nút bấm
-        setupButtonListeners();
-    }
-
+    private boolean isPaymentSuccessful = false; // Biến này sẽ được đặt thành true khi thanh toán thành công
+   private Toolbar toolbar;
+   private ImageView movieImageView;
+   private TextView movieNameTextView, showTimeTextView, locationTextView, priceTextView;
+   private Button btnThanhToan, btnThanhToanB;
+   private TextView soLuongVeTextView, viTriGheTextView, giamgiaTextView;
+   private String sessionId, totalPrice, priceDiscount, ticketPriceAfterDiscount;
+   private ArrayList<String> selectedSeats;
+   @Override protected void onCreate(Bundle savedInstanceState) {
+       super.onCreate(savedInstanceState);
+       setContentView(R.layout.payment_activity);
+       StrictMode.setThreadPolicy(new StrictMode.ThreadPolicy.Builder().permitAll().build());
+       ZaloPaySDK.init(2554, Environment.SANDBOX); // Thiết lập Toolbar
+       setupToolbar();
+       getIntentData();
+       mapViews();
+       applyDiscountBasedOnRank();
+       displaySeatInfo();
+       initData(sessionId);
+       setupButtonListeners();
+   }
     private void setupToolbar() {
-        toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-        if (getSupportActionBar() != null) {
-            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        }
-        toolbar.setNavigationOnClickListener(v -> onBackPressed());
-    }
-
-    private void getIntentData() {
-        sessionId = getIntent().getStringExtra("sessionId");
-        totalPrice = getIntent().getStringExtra("totalPrice");
-        selectedSeats = getIntent().getStringArrayListExtra("selectedSeats");
-
-        Log.d("PaymentActivity", "Received sessionId: " + sessionId);
-        Log.d("PaymentActivity", "Received totalPrice: " + totalPrice);
-        Log.d("PaymentActivity", "Received selectedSeats size: " + (selectedSeats != null ? selectedSeats.size() : 0));
-    }
-
+       toolbar = findViewById(R.id.toolbar); setSupportActionBar(toolbar);
+       if (getSupportActionBar() != null) {
+           getSupportActionBar().setDisplayHomeAsUpEnabled(true); }
+       toolbar.setNavigationOnClickListener(v -> onBackPressed()); }
+    private void getIntentData() { sessionId = getIntent().getStringExtra("sessionId");
+       totalPrice = getIntent().getStringExtra("totalPrice");
+       selectedSeats = getIntent().getStringArrayListExtra("selectedSeats");
+       Log.d("PaymentActivity", "Received sessionId: " + sessionId);
+       Log.d("PaymentActivity", "Received totalPrice: " + totalPrice);
+       Log.d("PaymentActivity", "Received selectedSeats size: " + (selectedSeats != null ? selectedSeats.size() : 0)); }
     private void mapViews() {
-        movieImageView = findViewById(R.id.movieImageView);
-        movieNameTextView = findViewById(R.id.movieNameTextView);
-        showTimeTextView = findViewById(R.id.showTimeTextView);
-        locationTextView = findViewById(R.id.locationTextView);
-        priceTextView = findViewById(R.id.priceTextView);
-        btnThanhToan = findViewById(R.id.btnPayZalo);
-        btnThanhToanB = findViewById(R.id.btnthanhtoanbth);
-        soLuongVeTextView = findViewById(R.id.soluongveTextView);
-        viTriGheTextView = findViewById(R.id.vitrigheTextView);
-        giamgiaTextView = findViewById(R.id.giamgiaTextView);
-    }
+       movieImageView = findViewById(R.id.movieImageView);
+       movieNameTextView = findViewById(R.id.movieNameTextView);
+       showTimeTextView = findViewById(R.id.showTimeTextView);
+       locationTextView = findViewById(R.id.locationTextView);
+       priceTextView = findViewById(R.id.priceTextView);
+       btnThanhToan = findViewById(R.id.btnPayZalo);
+       btnThanhToanB = findViewById(R.id.btnthanhtoanbth);
+       soLuongVeTextView = findViewById(R.id.soluongveTextView);
+       viTriGheTextView = findViewById(R.id.vitrigheTextView);
+       giamgiaTextView = findViewById(R.id.giamgiaTextView); }
+    private void displaySeatInfo() { soLuongVeTextView.setText("Số lượng vé: " + selectedSeats.size());
+       viTriGheTextView.setText("Vị trí ghế: " + String.join(", ", selectedSeats)); }
 
-    private void displaySeatInfo() {
-        soLuongVeTextView.setText("Số lượng vé: " + selectedSeats.size());
-        viTriGheTextView.setText("Vị trí ghế: " + String.join(", ", selectedSeats));
-    }
-
-    private void setupButtonListeners() {
+private void setupButtonListeners() {
         btnThanhToanB.setOnClickListener(v -> {
             saveInvoiceAndTickets();
-            startActivity(new Intent(PaymentActivity.this, MainActivity.class));
+            isPaymentSuccessful=true;
+          Intent returnIntent = new Intent(); returnIntent.putExtra("paymentSuccess", true);
+          setResult(RESULT_OK, returnIntent);
+
+          Intent mainIntent = new Intent(PaymentActivity.this, MainActivity.class); startActivity(mainIntent); finish(); // Đóng PaymentActivity
+
         });
 
         btnThanhToan.setOnClickListener(v -> {
@@ -158,8 +127,13 @@ public class PaymentActivity extends AppCompatActivity {
                     @Override
                     public void onPaymentSucceeded(String s, String s1, String s2) {
                         Log.d("PaymentActivity", "Payment succeeded");
-                        startActivity(new Intent(PaymentActivity.this, MainActivity.class));
                         saveInvoiceAndTickets();
+                        isPaymentSuccessful=true;
+                        Intent returnIntent = new Intent(); returnIntent.putExtra("paymentSuccess", true);
+                        setResult(RESULT_OK, returnIntent);
+
+                        Intent mainIntent = new Intent(PaymentActivity.this, MainActivity.class); startActivity(mainIntent); finish(); // Đóng PaymentActivity
+
                     }
 
                     @Override
@@ -222,6 +196,9 @@ public class PaymentActivity extends AppCompatActivity {
             }
         });
     }
+
+    private void clearTempData() {
+       selectedSeats.clear(); Log.d("PaymentActivity", "Temporary data cleared after successful payment"); }
 
 
     private String formatShowTime(String startDay, String startTime, String endTime) {
@@ -554,6 +531,24 @@ public class PaymentActivity extends AppCompatActivity {
                 // Xử lý lỗi nếu cần
             }
         });
+    }
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // Gọi lại dữ liệu nếu cần thiết khi Activity được mở lại
+        Log.d("PaymentActivity", "Activity resumed");
+        // Ví dụ, bạn có thể gọi lại phương thức để lấy dữ liệu người dùng hoặc cập nhật giao diện
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        // Xử lý các hành động cần thiết khi Activity bị hủy
+        Log.d("PaymentActivity", "Activity destroyed");
+        // Ví dụ, bạn có thể giải phóng tài nguyên hoặc lưu trạng thái hiện tại của Activity
+        if (isPaymentSuccessful) {
+            clearTempData();
+        }
     }
 
     @Override

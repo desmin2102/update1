@@ -123,18 +123,12 @@ public class SeatSelectionActivity extends AppCompatActivity {
                 builder.setTitle("Thông tin vé")
                         .setMessage("Số lượng vé: " + totalTickets + "\nVị trí ghế: " + ticketInfo + "\nTổng tiền: " + totalPrice + " đồng")
                         .setPositiveButton("Xác nhận", (dialog, which) -> {
-                            // Cập nhật trạng thái ghế đã mua lên Firebase trước khi chuyển qua trang hóa đơn
-                            DatabaseReference seatsRef = FirebaseDatabase.getInstance().getReference("Seat");
-                            for (String seat : selectedSeats) {
-                                seatsRef.child(seat).child("status").setValue("purchased");
-                            }
-
-                            // Chuyển sang trang hóa đơn
+                            // Chuyển sang trang thanh toán
                             Intent intent = new Intent(SeatSelectionActivity.this, PaymentActivity.class);
                             intent.putExtra("sessionId", sessionId);
                             intent.putExtra("totalPrice", String.valueOf(totalPrice));
                             intent.putStringArrayListExtra("selectedSeats", new ArrayList<>(selectedSeats));
-                            startActivity(intent);
+                            startActivityForResult(intent, 1); // Sử dụng startActivityForResult để nhận kết quả từ PaymentActivity
                         })
                         .setNegativeButton("Hủy", null)
                         .show();
@@ -146,6 +140,21 @@ public class SeatSelectionActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         refreshSeatsData();
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == 1) { // Kiểm tra mã yêu cầu
+            if (resultCode == RESULT_OK) { // Kiểm tra kết quả trả về từ PaymentActivity
+                boolean paymentSuccess = data.getBooleanExtra("paymentSuccess", false);
+                if (paymentSuccess) {
+                    // Xóa danh sách ghế đã chọn sau khi thanh toán thành công
+                    selectedSeats.clear();
+                    Log.d("SeatSelectionActivity", "Selected seats cleared after successful payment");
+                }
+            }
+        }
     }
 
     private void refreshSeatsData() {
