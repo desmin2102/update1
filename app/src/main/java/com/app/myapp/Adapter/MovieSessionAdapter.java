@@ -59,8 +59,7 @@
                 holder.availableSeatsTextView.setText("N/A");
             }
 
-            // Cập nhật số ghế từ Firebase (dựa trên MovieSession)
-            updateAvailableSeatsFromFirebase(session.getSessionId(), holder.availableSeatsTextView);
+
 
             // Định dạng lại thời gian
             String formattedStartTime = formatTime(session.getStartTime());
@@ -74,27 +73,6 @@
                 intent.putExtra("movieId", session.getMovieId());
                 intent.putExtra("roomId", session.getRoomId());
                 context.startActivity(intent);
-            });
-        }
-
-        private void updateAvailableSeatsFromFirebase(String sessionId, TextView availableSeatsTextView) {
-            DatabaseReference sessionRef = FirebaseDatabase.getInstance()
-                    .getReference("MovieSession")
-                    .child(sessionId);
-
-            sessionRef.child("availableSeats").addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot snapshot) {
-                    if (snapshot.exists()) {
-                        int availableSeats = snapshot.getValue(Integer.class);
-                        availableSeatsTextView.setText(String.valueOf(availableSeats)); // Cập nhật TextView ngay lập tức
-                    }
-                }
-
-                @Override
-                public void onCancelled(@NonNull DatabaseError error) {
-                    Log.e("Firebase", "Failed to load available seats", error.toException());
-                }
             });
         }
 
