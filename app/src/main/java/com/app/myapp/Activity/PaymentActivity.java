@@ -131,7 +131,6 @@ private void setupButtonListeners() {
                         isPaymentSuccessful=true;
                         Intent returnIntent = new Intent(); returnIntent.putExtra("paymentSuccess", true);
                         setResult(RESULT_OK, returnIntent);
-
                         Intent mainIntent = new Intent(PaymentActivity.this, MainActivity.class); startActivity(mainIntent); finish(); // Đóng PaymentActivity
 
                     }

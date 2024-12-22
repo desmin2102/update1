@@ -143,4 +143,6 @@ public class ScheduleActivity extends AppCompatActivity {
 
         return days;
     }
+    @Override protected void onResume() { super.onResume();
+        if (selectedLocationId != null) { updateDayAdapter(selectedLocationId); } }
 }

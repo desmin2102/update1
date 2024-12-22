@@ -78,27 +78,26 @@
         }
 
         private void updateAvailableSeatsFromFirebase(String sessionId, TextView availableSeatsTextView) {
-            // Giả sử bạn có Firebase reference tới MovieSession
             DatabaseReference sessionRef = FirebaseDatabase.getInstance()
                     .getReference("MovieSession")
                     .child(sessionId);
 
-            sessionRef.child("availableSeats").addValueEventListener(new ValueEventListener() {
+            sessionRef.child("availableSeats").addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot snapshot) {
                     if (snapshot.exists()) {
                         int availableSeats = snapshot.getValue(Integer.class);
-                        availableSeatsTextView.setText(String.valueOf(availableSeats)); // Cập nhật TextView
+                        availableSeatsTextView.setText(String.valueOf(availableSeats)); // Cập nhật TextView ngay lập tức
                     }
                 }
 
                 @Override
                 public void onCancelled(@NonNull DatabaseError error) {
-                    // Log lỗi nếu có
                     Log.e("Firebase", "Failed to load available seats", error.toException());
                 }
             });
         }
+
 
         @Override
         public int getItemCount() {
