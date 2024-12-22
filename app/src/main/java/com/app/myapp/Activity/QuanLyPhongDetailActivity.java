@@ -104,21 +104,21 @@ public class QuanLyPhongDetailActivity extends AppCompatActivity {
             @Override
             public void onDataChange(DataSnapshot snapshot) {
                 List<String> addressList = new ArrayList<>();
-                locationMap.clear(); // Xóa map trước khi thêm mới
+                locationMap.clear();
 
                 for (DataSnapshot data : snapshot.getChildren()) {
                     Location location = data.getValue(Location.class);
                     if (location != null) {
-                        locationMap.put(location.getId(), location.getAddress()); // Key là locationId
+                        locationMap.put(location.getId(), location.getAddress());
                         addressList.add(location.getAddress());
                     }
                 }
 
+                if (addressList.isEmpty()) {
+                    Toast.makeText(QuanLyPhongDetailActivity.this, "No locations available", Toast.LENGTH_SHORT).show();
+                }
 
                 setSpinnerAdapter(spChonRap, addressList);
-                Log.d("SpinnerCheck", "Location Map: " + locationMap.toString()); // Log kiểm tra
-                spChonRap.setSelection(0); // Đặt mặc định là mục đầu tiên (tùy chọn)
-
                 callback.run();
             }
 
@@ -130,6 +130,7 @@ public class QuanLyPhongDetailActivity extends AppCompatActivity {
     }
 
 
+
     private void displayRoomDetails(Room room) {
         editTenPhong.setText(room.getRoomName());
         editSoGhe.setText(String.valueOf(room.getTotalSeats()));
@@ -138,14 +139,14 @@ public class QuanLyPhongDetailActivity extends AppCompatActivity {
 
         // Ensure correct spinner selection based on locationId
         String locationId = room.getLocationId();
-        String locationAddress = locationMap.get(locationId); // Tìm địa chỉ dựa trên locationId
-        if (locationAddress != null) {
-            int position = ((ArrayAdapter) spChonRap.getAdapter()).getPosition(locationAddress);
-            spChonRap.setSelection(position); // Đặt spinner đúng giá trị
-        }
-        else {
+        if (locationMap.containsKey(locationId)) {
+            String locationAddress = locationMap.get(locationId);
+            int position = ((ArrayAdapter<String>) spChonRap.getAdapter()).getPosition(locationAddress);
+            spChonRap.setSelection(position);
+        } else {
             Log.e("SpinnerCheck", "Invalid locationId: " + locationId);
         }
+
 
     }
 
@@ -174,10 +175,15 @@ public class QuanLyPhongDetailActivity extends AppCompatActivity {
 
 
     private void setSpinnerAdapter(Spinner spinner, List<String> addressList) {
+        if (addressList.isEmpty()) {
+            Toast.makeText(this, "Location list is empty", Toast.LENGTH_SHORT).show();
+            return;
+        }
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, addressList);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinner.setAdapter(adapter);
     }
+
 
 
     private void loadRoomData(String roomId) {
@@ -249,17 +255,24 @@ public class QuanLyPhongDetailActivity extends AppCompatActivity {
 
 
     private String getLocationIdFromSpinner() {
-        int selectedPosition = spChonRap.getSelectedItemPosition();
-        String selectedAddress = (String) spChonRap.getItemAtPosition(selectedPosition); // Lấy địa chỉ đã chọn
+        String selectedAddress = (String) spChonRap.getSelectedItem(); // Địa chỉ được chọn
+        if (selectedAddress == null || selectedAddress.isEmpty()) {
+            Log.e("SpinnerCheck", "No address selected from Spinner");
+            return null;
+        }
+
         for (Map.Entry<String, String> entry : locationMap.entrySet()) {
             if (entry.getValue().equals(selectedAddress)) {
                 return entry.getKey(); // Trả về locationId
             }
         }
-        Toast.makeText(this, "Selected location is invalid", Toast.LENGTH_SHORT).show();
-        return null;
 
+        Log.e("SpinnerCheck", "Selected location is invalid: " + selectedAddress);
+        return null;
     }
+
+
+
 
 
 
@@ -288,8 +301,7 @@ public class QuanLyPhongDetailActivity extends AppCompatActivity {
                 Toast.makeText(this, "Seats, columns, and rows must be positive integers", Toast.LENGTH_SHORT).show();
                 return;
             }
-
-            String locationId = locationMap.get(spChonRap.getSelectedItem().toString()); // Use the spinner item to fetch locationId
+            String locationId = getLocationIdFromSpinner();
             if (locationId == null) {
                 Toast.makeText(this, "Please select a valid location", Toast.LENGTH_SHORT).show();
                 return;
