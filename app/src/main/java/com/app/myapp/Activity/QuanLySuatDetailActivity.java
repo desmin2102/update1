@@ -320,15 +320,14 @@ public class QuanLySuatDetailActivity extends AppCompatActivity {
     private void selectStartDay() {
         Calendar calendar = Calendar.getInstance();
         new DatePickerDialog(this, (view, year, month, day) -> {
-            // Lấy ngày chọn
-            String selectedStartDay = year + "-" + (month + 1) + "-" + day;
-
-            // Kiểm tra xem ngày chọn có phải là ngày trong quá khứ không
             Calendar selectedDate = Calendar.getInstance();
             selectedDate.set(year, month, day);
+
+            // So sánh ngày chọn với ngày hiện tại
             if (selectedDate.before(Calendar.getInstance())) {
                 Toast.makeText(this, "Ngày không thể là quá khứ!", Toast.LENGTH_SHORT).show();
             } else {
+                String selectedStartDay = year + "-" + (month + 1) + "-" + day;
                 btChonNgay.setText(selectedStartDay);
                 Toast.makeText(this, "Ngày chọn: " + selectedStartDay, Toast.LENGTH_SHORT).show();
             }
@@ -336,51 +335,68 @@ public class QuanLySuatDetailActivity extends AppCompatActivity {
     }
 
     private void selectStartHour() {
-        Calendar calendar = Calendar.getInstance();
+        Calendar current = Calendar.getInstance();
         new TimePickerDialog(this, (view, hour, minute) -> {
-            // Lấy giờ chọn
-            String selectedStartHour = hour + ":" + minute;
-
-            // Kiểm tra xem giờ chọn có hợp lệ so với thời gian hiện tại không
             Calendar selectedTime = Calendar.getInstance();
-            selectedTime.set(Calendar.HOUR_OF_DAY, hour);
-            selectedTime.set(Calendar.MINUTE, minute);
-            if (selectedTime.before(Calendar.getInstance())) {
-                Toast.makeText(this, "Giờ không thể trong quá khứ!", Toast.LENGTH_SHORT).show();
+            String startDate = btChonNgay.getText().toString();
+            if (!startDate.isEmpty()) {
+                // Tách ngày đã chọn từ TextView và thiết lập thời gian tương ứng
+                String[] dateParts = startDate.split("-");
+                int year = Integer.parseInt(dateParts[0]);
+                int month = Integer.parseInt(dateParts[1]) - 1;
+                int day = Integer.parseInt(dateParts[2]);
+                selectedTime.set(year, month, day, hour, minute, 0);
+            }
+
+            // So sánh ngày giờ chọn với ngày giờ hiện tại
+            if (selectedTime.before(current)) {
+                Toast.makeText(this, "Thời gian không thể là quá khứ!", Toast.LENGTH_SHORT).show();
             } else {
+                String selectedStartHour = hour + ":" + (minute < 10 ? "0" + minute : minute);
                 btChonGio.setText(selectedStartHour);
                 Toast.makeText(this, "Giờ chọn: " + selectedStartHour, Toast.LENGTH_SHORT).show();
             }
-        }, calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE), true).show();
+        }, current.get(Calendar.HOUR_OF_DAY), current.get(Calendar.MINUTE), true).show();
     }
 
     private void selectEndHour() {
-        Calendar calendar = Calendar.getInstance();
+        Calendar current = Calendar.getInstance();
         new TimePickerDialog(this, (view, hour, minute) -> {
-            // Lấy giờ kết thúc
-            String selectedEndHour = hour + ":" + minute;
-
-            // Kiểm tra giờ kết thúc phải sau giờ bắt đầu
             Calendar selectedEndTime = Calendar.getInstance();
-            selectedEndTime.set(Calendar.HOUR_OF_DAY, hour);
-            selectedEndTime.set(Calendar.MINUTE, minute);
+            String startDate = btChonNgay.getText().toString();
+            if (!startDate.isEmpty()) {
+                // Tách ngày đã chọn từ TextView và thiết lập thời gian tương ứng
+                String[] dateParts = startDate.split("-");
+                int year = Integer.parseInt(dateParts[0]);
+                int month = Integer.parseInt(dateParts[1]) - 1;
+                int day = Integer.parseInt(dateParts[2]);
+                selectedEndTime.set(year, month, day, hour, minute, 0);
+            }
 
-            Calendar selectedStartTime = Calendar.getInstance();
+            // Lấy thời gian bắt đầu từ TextView
             String startHour = btChonGio.getText().toString();
-            String[] startTimeParts = startHour.split(":");
-            int startStartHour = Integer.parseInt(startTimeParts[0]);
-            int startStartMinute = Integer.parseInt(startTimeParts[1]);
-            selectedStartTime.set(Calendar.HOUR_OF_DAY, startStartHour);
-            selectedStartTime.set(Calendar.MINUTE, startStartMinute);
+            if (startHour.isEmpty()) {
+                Toast.makeText(this, "Vui lòng chọn giờ bắt đầu trước!", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            Calendar selectedStartTime = Calendar.getInstance();
+            String[] timeParts = startHour.split(":");
+            int startHourInt = Integer.parseInt(timeParts[0]);
+            int startMinuteInt = Integer.parseInt(timeParts[1]);
+            selectedStartTime.set(selectedEndTime.get(Calendar.YEAR), selectedEndTime.get(Calendar.MONTH),
+                    selectedEndTime.get(Calendar.DAY_OF_MONTH), startHourInt, startMinuteInt, 0);
 
+            // So sánh thời gian kết thúc với thời gian bắt đầu
             if (selectedEndTime.before(selectedStartTime)) {
                 Toast.makeText(this, "Giờ kết thúc phải sau giờ bắt đầu!", Toast.LENGTH_SHORT).show();
             } else {
+                String selectedEndHour = hour + ":" + (minute < 10 ? "0" + minute : minute);
                 btChonGioHet.setText(selectedEndHour);
                 Toast.makeText(this, "Giờ hết chọn: " + selectedEndHour, Toast.LENGTH_SHORT).show();
             }
-        }, calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE), true).show();
+        }, current.get(Calendar.HOUR_OF_DAY), current.get(Calendar.MINUTE), true).show();
     }
+
 
     private void addNewSession() {
         // Cập nhật dữ liệu từ giao diện
