@@ -13,6 +13,7 @@ import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.app.myapp.Class.Movie;
@@ -24,11 +25,16 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 
@@ -409,66 +415,75 @@ public class QuanLySuatDetailActivity extends AppCompatActivity {
         String startHour = btChonGio.getText().toString().trim();
         String endHour = btChonGioHet.getText().toString().trim();
 
-        // Thêm log để kiểm tra giá trị của từng trường
-        Log.d("QuanLySuatDetailActivity", "Session Name: " + sessionName);
-        Log.d("QuanLySuatDetailActivity", "Movie ID: " + movieId);
-        Log.d("QuanLySuatDetailActivity", "Room ID: " + roomId);
-        Log.d("QuanLySuatDetailActivity", "Location ID: " + locationId);
-        Log.d("QuanLySuatDetailActivity", "Price: " + price);
-        Log.d("QuanLySuatDetailActivity", "Start Day: " + startDay);
-        Log.d("QuanLySuatDetailActivity", "Start Hour: " + startHour);
-        Log.d("QuanLySuatDetailActivity", "End Hour: " + endHour);
-
         // Kiểm tra dữ liệu đầu vào
-        if (sessionName.isEmpty()) {
-            Log.e("QuanLySuatDetailActivity", "Session Name is empty!");
-        }
-        if (movieId == null || movieId.isEmpty()) {
-            Log.e("QuanLySuatDetailActivity", "Movie ID is empty or null!");
-        }
-        if (roomId == null || roomId.isEmpty()) {
-            Log.e("QuanLySuatDetailActivity", "Room ID is empty or null!");
-        }
-        if (locationId == null || locationId.isEmpty()) {
-            Log.e("QuanLySuatDetailActivity", "Location ID is empty or null!");
-        }
-        if (price.isEmpty()) {
-            Log.e("QuanLySuatDetailActivity", "Price is empty!");
-        }
-        if (startDay.isEmpty()) {
-            Log.e("QuanLySuatDetailActivity", "Start Day is empty!");
-        }
-        if (startHour.isEmpty()) {
-            Log.e("QuanLySuatDetailActivity", "Start Hour is empty!");
-        }
-        if (endHour.isEmpty()) {
-            Log.e("QuanLySuatDetailActivity", "End Hour is empty!");
-        }
-
-        // Kiểm tra nếu có bất kỳ trường nào trống
-        if (sessionName.isEmpty() || movieId == null || movieId.isEmpty() || roomId == null || roomId.isEmpty() || locationId == null || locationId.isEmpty() || price.isEmpty() || startDay.isEmpty() || startHour.isEmpty() || endHour.isEmpty()) {
+        if (sessionName.isEmpty() || movieId == null || roomId == null || locationId == null || price.isEmpty() || startDay.isEmpty() || startHour.isEmpty() || endHour.isEmpty()) {
             Toast.makeText(this, "Vui lòng điền đầy đủ thông tin!", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        // Tạo ID mới cho phiên chiếu
-        String newSessionId = UUID.randomUUID().toString();
-        if (newSessionId == null) {
-            Toast.makeText(this, "Không thể tạo ID cho phiên làm việc!", Toast.LENGTH_SHORT).show();
-            return;
+        // Tải danh sách các suất chiếu từ Firebase
+        movieSessionRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                boolean isConflict = false;
+
+                for (DataSnapshot sessionSnapshot : snapshot.getChildren()) {
+                    MovieSession existingSession = sessionSnapshot.getValue(MovieSession.class);
+
+                    if (existingSession != null &&
+                            existingSession.getStartDay().equals(startDay) &&
+                            existingSession.getRoomId().equals(roomId)) {
+
+                        // So sánh thời gian chồng lấn
+                        if (!isTimeNonOverlapping(existingSession.getStartTime(), existingSession.getEndTime(), startHour, endHour)) {
+                            isConflict = true;
+                            break;
+                        }
+                    }
+                }
+
+                if (isConflict) {
+                    Toast.makeText(QuanLySuatDetailActivity.this, "Khung giờ này đã có suất chiếu khác trong phòng!", Toast.LENGTH_SHORT).show();
+                } else {
+                    // Không trùng lặp, thêm suất mới
+                    String newSessionId = UUID.randomUUID().toString();
+                    MovieSession newSession = new MovieSession(newSessionId, sessionName, movieId, roomId, startDay, startHour, endHour, price);
+
+                    movieSessionRef.child(newSessionId).setValue(newSession)
+                            .addOnSuccessListener(aVoid -> {
+                                Toast.makeText(QuanLySuatDetailActivity.this, "Thêm thành công!", Toast.LENGTH_SHORT).show();
+                                finish();
+                            })
+                            .addOnFailureListener(e -> Toast.makeText(QuanLySuatDetailActivity.this, "Lỗi khi thêm: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Toast.makeText(QuanLySuatDetailActivity.this, "Lỗi khi kiểm tra dữ liệu: " + error.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    // Hàm kiểm tra thời gian không chồng lấn
+    private boolean isTimeNonOverlapping(String existingStartTime, String existingEndTime, String newStartTime, String newEndTime) {
+        SimpleDateFormat sdf = new SimpleDateFormat("HH:mm", Locale.getDefault());
+
+        try {
+            Date existingStart = sdf.parse(existingStartTime);
+            Date existingEnd = sdf.parse(existingEndTime);
+            Date newStart = sdf.parse(newStartTime);
+            Date newEnd = sdf.parse(newEndTime);
+
+            // Kiểm tra điều kiện: newStart phải sau existingEnd hoặc newEnd phải trước existingStart
+            return newStart.after(existingEnd) || newEnd.before(existingStart);
+        } catch (ParseException e) {
+            e.printStackTrace();
         }
 
-        // Tạo đối tượng MovieSession mới
-        MovieSession newSession = new MovieSession(newSessionId, sessionName, movieId, roomId, startDay, startHour, endHour, price);
-
-        // Lưu dữ liệu vào Firebase
-        movieSessionRef.child(newSessionId).setValue(newSession)
-                .addOnSuccessListener(aVoid -> {
-                    Toast.makeText(this, "Thêm thành công!", Toast.LENGTH_SHORT).show();
-                    finish();
-                })
-                .addOnFailureListener(e -> Toast.makeText(this, "Lỗi khi thêm: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+        return false;
     }
+
 
     private void updateSessionDetails() {
         // Kiểm tra nếu đang trong chế độ chỉnh sửa
